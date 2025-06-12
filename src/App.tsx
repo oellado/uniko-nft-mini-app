@@ -168,27 +168,36 @@ export default function App() {
         }}
       >
         {/* Top Bar */}
-        <div className="w-full bg-white/20 backdrop-blur-sm border-b border-white/30 p-4 flex items-center justify-between">
+        <div className="w-full bg-white/20 backdrop-blur-sm border-b border-white/30 px-4 py-2 flex items-center justify-between" style={{ height: '56px' }}>
           <button
             onClick={handleBackToMint}
-            className="flex items-center text-gray-700 hover:text-gray-900 transition-colors"
+            className="flex items-center text-gray-700 hover:text-gray-900 transition-colors p-1"
           >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Mint
+            <span className="text-sm font-medium">Back</span>
           </button>
-          <h1 className="text-xl font-bold text-gray-800">My Uniko Collection</h1>
-          <div className="w-20"></div> {/* Spacer for centering */}
+          <h1 className="text-lg font-bold text-gray-800 gradient-text">My Unikō Collection</h1>
+          <div className="w-16"></div> {/* Spacer for centering */}
         </div>
 
         {/* Collection Grid */}
         <div className="flex-1 p-6">
           {mintedNFTs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
-              <div className="text-6xl mb-4">🎨</div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">No Unikos Yet</h2>
-              <p className="text-gray-600 mb-4">Mint your first Uniko to start your collection!</p>
+            <div className="flex flex-col items-center justify-center text-center">
+              <h2 className="text-2xl font-bold text-gray-700 mb-2">No Unikō Yet</h2>
+              <p className="text-gray-600 mb-6">Mint your first Unikō to start your collection!</p>
+              
+              {/* Empty Collection Grid */}
+              <div className="grid grid-cols-4 gap-3 mb-6 max-w-xs mx-auto">
+                {Array.from({ length: 16 }).map((_, index) => (
+                  <div key={index} className="w-16 h-16 bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-center">
+                    <span className="text-gray-400 text-xs">• ᴗ •</span>
+                  </div>
+                ))}
+              </div>
+              
               <button
                 onClick={handleBackToMint}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
@@ -205,7 +214,7 @@ export default function App() {
                     dangerouslySetInnerHTML={{ __html: nft.svg }}
                   />
                   <div className="p-3 bg-gray-50">
-                    <p className="text-sm font-medium text-gray-700">Uniko #{index + 1}</p>
+                    <p className="text-sm font-medium text-gray-700">Unikō #{index + 1}</p>
                     <p className="text-xs text-gray-500">{nft.traits.eyes} • {nft.traits.mouth}</p>
                   </div>
                 </div>
@@ -230,13 +239,13 @@ export default function App() {
       }}
     >
       {/* Top Bar */}
-      <div className="w-full bg-white/20 backdrop-blur-sm border-b border-white/30 p-4 flex items-center justify-end">
+      <div className="w-full bg-white/20 backdrop-blur-sm border-b border-white/30 px-4 py-2 flex items-center justify-end" style={{ height: '56px' }}>
         {userContext?.user && (
           <button
             onClick={handleProfileClick}
-            className="flex items-center space-x-2 hover:bg-white/20 rounded-lg p-2 transition-colors"
+            className="flex items-center hover:bg-white/20 rounded-full p-1 transition-colors"
           >
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center border-2 border-white shadow-sm">
               {userContext.user.pfpUrl ? (
                 <img 
                   src={userContext.user.pfpUrl} 
@@ -247,13 +256,10 @@ export default function App() {
                   }}
                 />
               ) : null}
-              <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
                 {userContext.user.displayName?.[0] || userContext.user.username?.[0] || '?'}
               </div>
             </div>
-            <span className="text-sm font-medium text-gray-700 hidden sm:block">
-              {userContext.user.displayName || userContext.user.username || `FID ${userContext.user.fid}`}
-            </span>
           </button>
         )}
       </div>
