@@ -9,15 +9,6 @@ export default function App() {
   const [selectedNFT, setSelectedNFT] = useState<any | null>(null);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
 
-  // Mock user data
-  const mockUser = {
-    fid: 12345,
-    username: 'testuser',
-    displayName: 'Test User',
-    profileImageUrl: 'https://images.farcaster.xyz/profile_image?fid=12345'
-  };
-
-  // Initialize Frame SDK
   useEffect(() => {
     const initializeSDK = async () => {
       try {
@@ -39,22 +30,7 @@ export default function App() {
     setTimeout(initializeSDK, 100);
   }, []);
 
-  const mintUnikoNFT = () => {
-    setIsMinting(true);
-    
-    setTimeout(() => {
-      const newNFT = generateUnikoNFT();
-      setMintedNFTs(prev => [...prev, newNFT]);
-      setDisplayNFT(newNFT);
-      setIsMinting(false);
-    }, 2000);
-  };
-
-  const generateNewPreview = () => {
-    setDisplayNFT(generatePreviewNFT());
-  };
-
-  // Show loading screen
+  // Loading screen while SDK initializes
   if (!isSDKLoaded) {
     return (
       <div style={{ 
@@ -78,379 +54,400 @@ export default function App() {
     );
   }
 
+  // Mock user data
+  const mockUser = {
+    fid: 12345,
+    username: 'testuser',
+    displayName: 'Test User',
+    pfpUrl: 'https://i.imgur.com/placeholder.jpg'
+  };
+
+  const handleMint = async () => {
+    setIsMinting(true);
+    // Simulate minting process
+    setTimeout(() => {
+      const newNFT = generateUnikoNFT(`seed-${Date.now()}-${Math.random()}`);
+      setMintedNFTs(prev => [...prev, newNFT]);
+      setDisplayNFT(newNFT); // Show the minted NFT on the main screen
+      setIsMinting(false);
+      alert('NFT Minted Successfully!');
+    }, 2000);
+  };
+
+  const handleProfileClick = () => {
+    setShowCollection(true);
+  };
+
+  const handleBackToMint = () => {
+    setShowCollection(false);
+  };
+
+  const handleNFTClick = (nft: any) => {
+    setSelectedNFT(nft);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedNFT(null);
+  };
+
   if (showCollection) {
     return (
-      <>
-        <div style={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #BFDBFE 0%, #DDD6FE 100%)',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
-        }}>
-          {/* Top Bar */}
-          <div style={{
-            height: '56px',
-            background: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(10px)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 16px',
-            position: 'sticky',
-            top: 0,
-            zIndex: 10
-          }}>
-            <button
-              onClick={() => setShowCollection(false)}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: '16px',
-                color: '#6B7280',
-                cursor: 'pointer',
-                padding: '8px'
-              }}
-            >
-              ← Back
-            </button>
-            
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              <img
-                src={mockUser.profileImageUrl}
-                alt="Profile"
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  objectFit: 'cover'
-                }}
-              />
-              <span style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151'
-              }}>
-                @{mockUser.username}
-              </span>
-            </div>
-          </div>
-
-          {/* Collection Content */}
-          <div style={{ padding: '20px' }}>
-            <div style={{
-              textAlign: 'center',
-              marginBottom: '24px'
-            }}>
-              <h1 style={{
-                fontSize: '24px',
-                fontWeight: '800',
-                background: 'linear-gradient(45deg, #9333ea, #ec4899, #3b82f6, #10b981, #f59e0b)',
-                backgroundSize: '200% 200%',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                margin: '0 0 8px 0'
-              }}>
-                Your Unikō Collection
-              </h1>
-              <p style={{
-                fontSize: '14px',
-                color: 'rgba(0, 0, 0, 0.6)',
-                margin: 0
-              }}>
-                {mintedNFTs.length} {mintedNFTs.length === 1 ? 'Unikō' : 'Unikōs'} collected
-              </p>
-            </div>
-
-            {mintedNFTs.length === 0 ? (
-              <div style={{
-                textAlign: 'center',
-                padding: '40px 20px'
-              }}>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '12px',
-                  marginBottom: '24px',
-                  maxWidth: '240px',
-                  margin: '0 auto 24px auto'
-                }}>
-                  {Array.from({ length: 16 }, (_, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        aspectRatio: '1',
-                        background: 'rgba(255, 255, 255, 0.3)',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '16px',
-                        color: 'rgba(0, 0, 0, 0.4)'
-                      }}
-                    >
-                      • ᴗ •
-                    </div>
-                  ))}
-                </div>
-                <p style={{
-                  fontSize: '16px',
-                  color: 'rgba(0, 0, 0, 0.6)',
-                  margin: '0 0 16px 0'
-                }}>
-                  Your collection is empty
-                </p>
-                <p style={{
-                  fontSize: '14px',
-                  color: 'rgba(0, 0, 0, 0.5)',
-                  margin: 0
-                }}>
-                  Mint your first Unikō to get started!
-                </p>
-              </div>
-            ) : (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                gap: '16px',
-                maxWidth: '600px',
-                margin: '0 auto'
-              }}>
-                {mintedNFTs.map((nft, index) => (
-                  <div
-                    key={index}
-                    onClick={() => setSelectedNFT(nft)}
-                    style={{
-                      aspectRatio: '1',
-                      background: 'rgba(255, 255, 255, 0.9)',
-                      borderRadius: '12px',
-                      padding: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
-                      backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.05)';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                    }}
-                  >
-                    <div style={{
-                      fontSize: '32px',
-                      marginBottom: '8px'
-                    }}>
-                      {nft.face}
-                    </div>
-                    <div style={{
-                      fontSize: '10px',
-                      color: '#6B7280',
-                      textAlign: 'center'
-                    }}>
-                      #{nft.tokenId}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* NFT Detail Modal */}
+      <div style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(135deg, #BFDBFE 0%, #DDD6FE 100%)',
+        overflow: 'hidden',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+      }}>
+        {/* Blur overlay when modal is open */}
         {selectedNFT && (
-          <div
+          <div 
             style={{
               position: 'fixed',
               top: 0,
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'rgba(0, 0, 0, 0.5)',
+              width: '100%',
+              height: '100%',
+              backdropFilter: 'blur(8px)',
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              zIndex: 1000,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              zIndex: 1000,
-              padding: '20px'
+              overflow: 'hidden'
             }}
-            onClick={() => setSelectedNFT(null)}
+            onClick={handleCloseModal}
           >
-            <div
+            <div 
               style={{
-                background: 'white',
+                width: '260px',
+                height: '260px',
+                backgroundColor: 'white',
                 borderRadius: '16px',
-                padding: '24px',
-                maxWidth: '300px',
-                width: '100%',
-                textAlign: 'center'
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+                border: '2px solid #E5E7EB',
+                overflow: 'hidden',
+                position: 'relative',
+                maxWidth: '80vw',
+                maxHeight: '80vh'
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div style={{
-                fontSize: '64px',
-                marginBottom: '16px'
-              }}>
-                {selectedNFT.face}
-              </div>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                margin: '0 0 8px 0'
-              }}>
-                Unikō #{selectedNFT.tokenId}
-              </h3>
-              <div style={{
-                fontSize: '14px',
-                color: '#6B7280',
-                marginBottom: '16px'
-              }}>
-                <div>Rarity: {selectedNFT.rarity}</div>
-                <div>Body: {selectedNFT.body}</div>
-                <div>Eyes: {selectedNFT.eyes}</div>
-                <div>Mouth: {selectedNFT.mouth}</div>
-              </div>
-              <button
-                onClick={() => setSelectedNFT(null)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  background: '#6366F1',
+              <div 
+                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                dangerouslySetInnerHTML={{ __html: selectedNFT.svg }}
+              />
+              {selectedNFT.isUltraRare && (
+                <div style={{
+                  position: 'absolute',
+                  top: '12px',
+                  left: '12px',
+                  background: 'linear-gradient(45deg, #9333ea, #ec4899)',
                   color: 'white',
-                  border: 'none',
+                  padding: '4px 8px',
                   borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer'
-                }}
-              >
-                Close
-              </button>
+                  fontSize: '12px',
+                  fontWeight: '700'
+                }}>
+                  ✨ ULTRA RARE ✨
+                </div>
+              )}
             </div>
           </div>
         )}
-      </>
+
+        {/* Top Bar */}
+        <div style={{ 
+          width: '100%', 
+          backgroundColor: 'rgba(255, 255, 255, 0.2)', 
+          backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.3)', 
+          padding: '8px 12px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          height: '48px',
+          boxSizing: 'border-box'
+        }}>
+          <button
+            onClick={handleBackToMint}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              color: '#374151', 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+            }}
+          >
+            <svg style={{ width: '16px', height: '16px', marginRight: '6px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+          <h1 style={{ 
+            fontSize: '16px', 
+            fontWeight: '700', 
+            background: 'linear-gradient(45deg, #9333ea, #ec4899, #3b82f6, #10b981, #f59e0b)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+          }}>My Unikō Collection</h1>
+          <div style={{ width: '48px' }}></div>
+        </div>
+
+        {/* Collection Content */}
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          height: 'calc(100% - 48px)', 
+          padding: '16px',
+          boxSizing: 'border-box'
+        }}>
+          {mintedNFTs.length === 0 ? (
+            <>
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <h2 style={{ 
+                  fontSize: '20px', 
+                  fontWeight: '600', 
+                  color: '#1F2937', 
+                  marginBottom: '6px', 
+                  margin: '0 0 6px 0',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+                }}>No Unikō Yet</h2>
+                <p style={{ 
+                  color: '#4B5563', 
+                  fontSize: '14px', 
+                  margin: '0',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+                }}>Mint your first Unikō to start your collection!</p>
+              </div>
+
+              {/* 4x4 Grid - Empty */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(4, 1fr)', 
+                gap: '8px', 
+                width: '240px',
+                height: '240px'
+              }}>
+                {Array.from({ length: 16 }).map((_, index) => (
+                  <div key={index} style={{ 
+                    width: '56px', 
+                    height: '56px', 
+                    backgroundColor: 'rgba(255, 255, 255, 0.5)', 
+                    borderRadius: '6px', 
+                    border: '1px solid #D1D5DB', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center' 
+                  }}>
+                    <span style={{ 
+                      color: '#9CA3AF', 
+                      fontSize: '12px',
+                      fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+                    }}>• ᴗ •</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <h2 style={{ 
+                  fontSize: '20px', 
+                  fontWeight: '600', 
+                  color: '#1F2937', 
+                  marginBottom: '6px', 
+                  margin: '0 0 6px 0',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+                }}>My Unikō Collection</h2>
+                <p style={{ 
+                  color: '#4B5563', 
+                  fontSize: '14px', 
+                  margin: '0',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+                }}>{mintedNFTs.length} Unikō{mintedNFTs.length !== 1 ? 's' : ''} collected</p>
+              </div>
+
+              {/* 4x4 Grid - With NFTs */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(4, 1fr)', 
+                gap: '8px', 
+                width: '240px',
+                height: '240px'
+              }}>
+                {Array.from({ length: 16 }).map((_, index) => (
+                  <div 
+                    key={index} 
+                    style={{ 
+                      width: '56px', 
+                      height: '56px', 
+                      backgroundColor: index < mintedNFTs.length ? 'white' : 'rgba(255, 255, 255, 0.5)', 
+                      borderRadius: '6px', 
+                      border: '1px solid #D1D5DB', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      cursor: index < mintedNFTs.length ? 'pointer' : 'default',
+                      transition: 'transform 0.1s ease',
+                    }}
+                    onClick={() => index < mintedNFTs.length && handleNFTClick(mintedNFTs[index])}
+                    onMouseDown={(e) => {
+                      if (index < mintedNFTs.length) {
+                        e.currentTarget.style.transform = 'scale(0.95)';
+                      }
+                    }}
+                    onMouseUp={(e) => {
+                      if (index < mintedNFTs.length) {
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (index < mintedNFTs.length) {
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }
+                    }}
+                  >
+                    {index < mintedNFTs.length ? (
+                      <div 
+                        style={{ 
+                          width: '250px', 
+                          height: '250px', 
+                          transform: 'scale(0.22)',
+                          transformOrigin: 'center center',
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          marginTop: '-125px',
+                          marginLeft: '-125px'
+                        }}
+                        dangerouslySetInnerHTML={{ __html: mintedNFTs[index].svg }}
+                      />
+                    ) : (
+                      <span style={{ 
+                        color: '#9CA3AF', 
+                        fontSize: '12px',
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+                      }}>• ᴗ •</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     );
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
+    <div style={{ 
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: '100%',
+      height: '100%',
       background: 'linear-gradient(135deg, #BFDBFE 0%, #DDD6FE 100%)',
+      overflow: 'hidden',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
     }}>
       {/* Top Bar */}
-      <div style={{
-        height: '56px',
-        background: 'rgba(255, 255, 255, 0.9)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 16px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10
+      <div style={{ 
+        width: '100%', 
+        backgroundColor: 'rgba(255, 255, 255, 0.2)', 
+        backdropFilter: 'blur(8px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.3)', 
+        padding: '8px 12px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'flex-end',
+        height: '48px',
+        boxSizing: 'border-box'
       }}>
-        <div style={{
-          fontSize: '18px',
-          fontWeight: '700',
-          background: 'linear-gradient(45deg, #9333ea, #ec4899)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
-        }}>
-          Unikō
-        </div>
-        
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
-        }}>
-          <button
-            onClick={() => setShowCollection(true)}
-            style={{
-              background: 'rgba(255, 255, 255, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '6px',
-              padding: '6px 12px',
-              fontSize: '12px',
-              fontWeight: '500',
-              color: '#374151',
-              cursor: 'pointer',
-              backdropFilter: 'blur(10px)'
-            }}
-          >
-            Collection ({mintedNFTs.length})
-          </button>
-          
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
+        <button
+          onClick={handleProfileClick}
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            background: 'none', 
+            border: 'none', 
+            borderRadius: '50%', 
+            padding: '2px', 
+            cursor: 'pointer' 
+          }}
+        >
+          <div style={{ 
+            width: '28px', 
+            height: '28px', 
+            borderRadius: '50%', 
+            background: 'linear-gradient(135deg, #60A5FA 0%, #A855F7 100%)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            color: 'white', 
+            fontSize: '11px', 
+            fontWeight: 'bold', 
+            border: '2px solid white', 
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
           }}>
-            <img
-              src={mockUser.profileImageUrl}
-              alt="Profile"
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                objectFit: 'cover'
-              }}
-            />
-            <span style={{
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151'
-            }}>
-              @{mockUser.username}
-            </span>
+            {mockUser.displayName?.[0] || '?'}
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Main Content */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 'calc(100vh - 56px)',
-        padding: '20px',
-        textAlign: 'center'
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'flex-start', 
+        height: 'calc(100% - 48px)', 
+        padding: '12px 16px',
+        paddingTop: '24px',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}>
         {/* Title */}
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{
-            fontSize: '32px',
-            fontWeight: '800',
+        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+          <h1 style={{ 
+            fontSize: '32px', 
+            fontWeight: '800', 
+            marginBottom: '8px',
+            margin: '0 0 8px 0',
             background: 'linear-gradient(45deg, #9333ea, #ec4899, #3b82f6, #10b981, #f59e0b)',
-            backgroundSize: '200% 200%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
-            margin: '0 0 8px 0'
-          }}>
-            Unikō
-          </h1>
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+          }}>Unikō</h1>
           <div style={{ 
-            color: 'rgba(0, 0, 0, 0.7)', 
-            fontSize: '14px', 
+            color: '#374151', 
+            fontSize: '13px', 
             lineHeight: '1.4',
-            fontWeight: '500'
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
+            fontWeight: '600'
           }}>
-            <p style={{ margin: '0 0 2px 0' }}>Your cute onchain companions</p>
-            <p style={{ margin: '0 0 2px 0' }}>generative project</p>
+            <p style={{ margin: '0 0 3px 0' }}>A cute on-chain companion</p>
+            <p style={{ margin: '0 0 3px 0' }}>100% onchain generative project</p>
             <p style={{ margin: '0' }}>
               by{' '}
               <a 
@@ -458,7 +455,7 @@ export default function App() {
                 target="_blank" 
                 rel="noopener noreferrer"
                 style={{ 
-                  color: 'rgba(0, 0, 0, 0.7)', 
+                  color: '#374151', 
                   textDecoration: 'underline',
                   fontWeight: '600'
                 }}
@@ -469,102 +466,59 @@ export default function App() {
           </div>
         </div>
 
-        {/* NFT Display */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.9)',
-          borderRadius: '20px',
-          padding: '32px',
-          marginBottom: '24px',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          minWidth: '200px'
-        }}>
-          <div style={{
-            fontSize: '72px',
-            marginBottom: '16px',
-            lineHeight: '1'
+        {/* NFT Card */}
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ 
+            width: '220px', 
+            height: '220px', 
+            backgroundColor: 'white', 
+            borderRadius: '12px', 
+            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)', 
+            border: '1px solid #E5E7EB', 
+            overflow: 'hidden',
+            position: 'relative'
           }}>
-            {displayNFT.face}
+            <div 
+              style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              dangerouslySetInnerHTML={{ __html: displayNFT.svg }}
+            />
+            {displayNFT.isUltraRare && (
+              <div style={{
+                position: 'absolute',
+                top: '8px',
+                left: '8px',
+                background: 'linear-gradient(45deg, #9333ea, #ec4899)',
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontSize: '10px',
+                fontWeight: '700'
+              }}>
+                ✨ ULTRA RARE ✨
+              </div>
+            )}
           </div>
-          <div style={{
-            fontSize: '12px',
-            color: '#6B7280',
-            marginBottom: '8px'
-          }}>
-            {displayNFT.isMinted ? `#${displayNFT.tokenId}` : 'Preview'}
-          </div>
-          {displayNFT.isMinted && (
-            <div style={{
-              fontSize: '10px',
-              color: '#6B7280'
-            }}>
-              {displayNFT.rarity} • {displayNFT.body} • {displayNFT.eyes} • {displayNFT.mouth}
-            </div>
-          )}
         </div>
 
-        {/* Action Buttons */}
-        <div style={{
-          display: 'flex',
-          gap: '12px',
-          marginBottom: '16px',
-          flexWrap: 'wrap',
-          justifyContent: 'center'
-        }}>
-          <button
-            onClick={generateNewPreview}
-            disabled={isMinting}
-            style={{
-              padding: '12px 20px',
-              background: 'rgba(255, 255, 255, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151',
-              cursor: isMinting ? 'not-allowed' : 'pointer',
-              backdropFilter: 'blur(10px)',
-              opacity: isMinting ? 0.5 : 1
-            }}
-          >
-            🎲 Randomize
-          </button>
-          
-          <button
-            onClick={mintUnikoNFT}
-            disabled={isMinting}
-            style={{
-              padding: '12px 20px',
-              background: isMinting 
-                ? 'rgba(156, 163, 175, 0.7)' 
-                : 'linear-gradient(45deg, #8B5CF6, #EC4899)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: isMinting ? 'not-allowed' : 'pointer',
-              backdropFilter: 'blur(10px)'
-            }}
-          >
-            {isMinting ? '⏳ Minting...' : '✨ Mint Unikō'}
-          </button>
-        </div>
-
-        {/* Minted Success Message */}
-        {mintedNFTs.length > 0 && displayNFT.isMinted && (
-          <div style={{
-            background: 'rgba(34, 197, 94, 0.1)',
-            border: '1px solid rgba(34, 197, 94, 0.2)',
-            borderRadius: '8px',
-            padding: '8px 16px',
-            fontSize: '12px',
-            color: '#065F46',
-            backdropFilter: 'blur(10px)'
-          }}>
-            🎉 Unikō #{displayNFT.tokenId} minted successfully!
-          </div>
-        )}
+        {/* Mint Button */}
+        <button
+          onClick={handleMint}
+          disabled={isMinting}
+          style={{ 
+            backgroundColor: isMinting ? '#60A5FA' : '#2563EB', 
+            color: 'white', 
+            fontWeight: '600', 
+            padding: '12px 24px', 
+            borderRadius: '8px', 
+            border: 'none', 
+            fontSize: '16px', 
+            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.1)', 
+            cursor: isMinting ? 'not-allowed' : 'pointer',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+          }}
+        >
+          {isMinting ? "Minting..." : "Mint • 0.001 ETH"}
+        </button>
       </div>
     </div>
   );
