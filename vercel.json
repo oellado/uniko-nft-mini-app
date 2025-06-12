@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/frame.js": {
-      "runtime": "@vercel/node"
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
