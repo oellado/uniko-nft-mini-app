@@ -37,6 +37,9 @@ export default function App() {
   const [displayNFT, setDisplayNFT] = useState(() => generatePreviewNFT());
   const [isReady, setIsReady] = useState(false);
   const [sdk, setSdk] = useState<any>(null);
+  const [userContext, setUserContext] = useState<any>(null);
+  const [showCollection, setShowCollection] = useState(false);
+  const [mintedNFTs, setMintedNFTs] = useState<any[]>([]);
 
   useEffect(() => {
     // Initialize Mini App SDK
@@ -48,12 +51,27 @@ export default function App() {
         // Set up the SDK
         setSdk(frameSDK);
         
+        // Get user context
+        if (frameSDK.context) {
+          const context = await frameSDK.context;
+          setUserContext(context);
+        }
+        
         // Signal that the Mini App is ready
         await frameSDK.actions.ready();
         setIsReady(true);
       } catch (error) {
         console.log('SDK not available, running in browser mode');
         setIsReady(true);
+        // Mock user for browser testing
+        setUserContext({
+          user: {
+            fid: 12345,
+            username: 'testuser',
+            displayName: 'Test User',
+            pfpUrl: 'https://i.imgur.com/placeholder.jpg'
+          }
+        });
       }
     };
 
@@ -70,6 +88,9 @@ export default function App() {
       
       const nft = generateUnikoNFT(`mint${Date.now()}`);
       setDisplayNFT(nft);
+      
+      // Add to minted collection
+      setMintedNFTs(prev => [...prev, nft]);
       
       // Show success toast if in Mini App context
       if (sdk?.actions?.close) {
@@ -115,6 +136,14 @@ export default function App() {
     }
   }, [sdk]);
 
+  const handleProfileClick = () => {
+    setShowCollection(true);
+  };
+
+  const handleBackToMint = () => {
+    setShowCollection(false);
+  };
+
   if (!isReady) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center" style={{ backgroundColor: '#BFDBFE' }}>
@@ -125,67 +154,163 @@ export default function App() {
     );
   }
 
+  // Collection View
+  if (showCollection) {
+    return (
+      <div 
+        className="min-h-screen w-full"
+        style={{ 
+          backgroundColor: '#BFDBFE',
+          paddingTop: `${safeAreaInsets.top}px`,
+          paddingBottom: `${safeAreaInsets.bottom}px`,
+          paddingLeft: `${safeAreaInsets.left}px`,
+          paddingRight: `${safeAreaInsets.right}px`
+        }}
+      >
+        {/* Top Bar */}
+        <div className="w-full bg-white/20 backdrop-blur-sm border-b border-white/30 p-4 flex items-center justify-between">
+          <button
+            onClick={handleBackToMint}
+            className="flex items-center text-gray-700 hover:text-gray-900 transition-colors"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Mint
+          </button>
+          <h1 className="text-xl font-bold text-gray-800">My Uniko Collection</h1>
+          <div className="w-20"></div> {/* Spacer for centering */}
+        </div>
+
+        {/* Collection Grid */}
+        <div className="flex-1 p-6">
+          {mintedNFTs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+              <div className="text-6xl mb-4">🎨</div>
+              <h2 className="text-2xl font-bold text-gray-700 mb-2">No Unikos Yet</h2>
+              <p className="text-gray-600 mb-4">Mint your first Uniko to start your collection!</p>
+              <button
+                onClick={handleBackToMint}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+              >
+                Start Minting
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+              {mintedNFTs.map((nft, index) => (
+                <div key={index} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                  <div 
+                    className="w-full aspect-square flex items-center justify-center p-2"
+                    dangerouslySetInnerHTML={{ __html: nft.svg }}
+                  />
+                  <div className="p-3 bg-gray-50">
+                    <p className="text-sm font-medium text-gray-700">Uniko #{index + 1}</p>
+                    <p className="text-xs text-gray-500">{nft.traits.eyes} • {nft.traits.mouth}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Main Mint View
   return (
     <div 
       className="min-h-screen w-full"
       style={{ 
         backgroundColor: '#BFDBFE',
-        paddingTop: `${80 + safeAreaInsets.top}px`,
+        paddingTop: `${safeAreaInsets.top}px`,
         paddingBottom: `${safeAreaInsets.bottom}px`,
         paddingLeft: `${safeAreaInsets.left}px`,
         paddingRight: `${safeAreaInsets.right}px`
       }}
     >
-      <div className="w-full max-w-sm" style={{ marginLeft: '50%', transform: 'translateX(-50%)' }}>
-        {/* Title and Description - Centered */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold mb-4 gradient-text">
-            Unikō
-          </h1>
-          <div className="text-gray-700 text-lg">
-            <p>A cute on-chain companion</p>
-            <p>100% onchain generative project</p>
-            <p>
-              by{' '}
-              <a 
-                href="https://farcaster.xyz/miguelgarest.eth" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline"
-              >
-                @miguelgarest.eth
-              </a>
-            </p>
-          </div>
-        </div>
-
-        {/* NFT Display - Centered */}
-        <div className="mb-8" style={{ marginLeft: '50%', transform: 'translateX(-50%)', width: '280px' }}>
-          <div className="w-[280px] h-[280px] bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div 
-              className="w-full h-full flex items-center justify-center"
-              dangerouslySetInnerHTML={{ __html: displayNFT.svg }}
-            />
-          </div>
-        </div>
-
-        {/* Mint Button - Centered */}
-        <div style={{ marginLeft: '50%', transform: 'translateX(-50%)', width: 'fit-content' }}>
+      {/* Top Bar */}
+      <div className="w-full bg-white/20 backdrop-blur-sm border-b border-white/30 p-4 flex items-center justify-end">
+        {userContext?.user && (
           <button
-            onClick={handleMint}
-            disabled={isMinting}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-4 px-8 rounded-lg transition-colors text-lg shadow-lg"
+            onClick={handleProfileClick}
+            className="flex items-center space-x-2 hover:bg-white/20 rounded-lg p-2 transition-colors"
           >
-            {isMinting ? "Minting..." : "Mint • 0.001 ETH"}
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center">
+              {userContext.user.pfpUrl ? (
+                <img 
+                  src={userContext.user.pfpUrl} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : null}
+              <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+                {userContext.user.displayName?.[0] || userContext.user.username?.[0] || '?'}
+              </div>
+            </div>
+            <span className="text-sm font-medium text-gray-700 hidden sm:block">
+              {userContext.user.displayName || userContext.user.username || `FID ${userContext.user.fid}`}
+            </span>
           </button>
-        </div>
-
-        {/* Error Message - Only if error */}
-        {error && (
-          <div className="mt-4 p-4 bg-red-100 border border-red-300 rounded-lg text-red-700 text-center" style={{ marginLeft: '20px', marginRight: '20px' }}>
-            {error}
-          </div>
         )}
+      </div>
+
+      {/* Main Content - Centered */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+        <div className="w-full max-w-sm">
+          {/* Title and Description - Centered */}
+          <div className="text-center mb-8">
+            <h1 className="text-5xl font-bold mb-4 gradient-text">
+              Unikō
+            </h1>
+            <div className="text-gray-700 text-lg">
+              <p>A cute on-chain companion</p>
+              <p>100% onchain generative project</p>
+              <p>
+                by{' '}
+                <a 
+                  href="https://farcaster.xyz/miguelgarest.eth" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  @miguelgarest.eth
+                </a>
+              </p>
+            </div>
+          </div>
+
+          {/* NFT Display - Centered */}
+          <div className="flex justify-center mb-8">
+            <div className="w-[280px] h-[280px] bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <div 
+                className="w-full h-full flex items-center justify-center"
+                dangerouslySetInnerHTML={{ __html: displayNFT.svg }}
+              />
+            </div>
+          </div>
+
+          {/* Mint Button - Centered */}
+          <div className="flex justify-center">
+            <button
+              onClick={handleMint}
+              disabled={isMinting}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-4 px-8 rounded-lg transition-colors text-lg shadow-lg"
+            >
+              {isMinting ? "Minting..." : "Mint • 0.001 ETH"}
+            </button>
+          </div>
+
+          {/* Error Message - Only if error */}
+          {error && (
+            <div className="mt-6 p-4 bg-red-100 border border-red-300 rounded-lg text-red-700 text-center">
+              {error}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
