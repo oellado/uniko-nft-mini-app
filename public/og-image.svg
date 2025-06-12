@@ -1,59 +1,42 @@
-<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#BFDBFE;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:1" />
     </linearGradient>
   </defs>
   
   <!-- Background -->
-  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="800" fill="url(#bg)"/>
   
   <!-- Main Content -->
-  <g transform="translate(100, 100)">
+  <g transform="translate(600, 400)">
+    <!-- Uniko Character -->
+    <circle cx="0" cy="-50" r="80" fill="#FFE4E1" stroke="#FF69B4" stroke-width="4"/>
+    
+    <!-- Eyes -->
+    <circle cx="-25" cy="-70" r="8" fill="#000"/>
+    <circle cx="25" cy="-70" r="8" fill="#000"/>
+    <circle cx="-22" cy="-72" r="3" fill="#FFF"/>
+    <circle cx="28" cy="-72" r="3" fill="#FFF"/>
+    
+    <!-- Mouth -->
+    <path d="M -20 -30 Q 0 -15 20 -30" stroke="#FF69B4" stroke-width="3" fill="none"/>
+    
+    <!-- Cheeks -->
+    <circle cx="-45" cy="-45" r="12" fill="#FFB6C1" opacity="0.7"/>
+    <circle cx="45" cy="-45" r="12" fill="#FFB6C1" opacity="0.7"/>
+    
     <!-- Title -->
-    <text x="500" y="80" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="64" font-weight="bold">
-      UnikoNFT
-    </text>
+    <text x="0" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#1E40AF">UnikoNFT</text>
+    <text x="0" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#1E40AF">Mint Your 100% On-Chain Companion</text>
     
-    <!-- Subtitle -->
-    <text x="500" y="140" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="32">
-      Mint Your Unique Companion
-    </text>
-    
-    <!-- Character Preview -->
-    <g transform="translate(400, 180)">
-      <!-- Body -->
-      <circle cx="100" cy="120" r="80" fill="#FFE4B5" stroke="#DEB887" stroke-width="3"/>
-      
-      <!-- Eyes -->
-      <circle cx="80" cy="100" r="8" fill="#000"/>
-      <circle cx="120" cy="100" r="8" fill="#000"/>
-      <circle cx="82" cy="98" r="3" fill="#fff"/>
-      <circle cx="122" cy="98" r="3" fill="#fff"/>
-      
-      <!-- Mouth -->
-      <path d="M 85 130 Q 100 145 115 130" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
-      
-      <!-- Cheeks -->
-      <circle cx="60" cy="115" r="12" fill="#FFB6C1" opacity="0.6"/>
-      <circle cx="140" cy="115" r="12" fill="#FFB6C1" opacity="0.6"/>
+    <!-- Sparkles -->
+    <g fill="#FFD700">
+      <polygon points="-150,-100 -145,-110 -140,-100 -145,-90" />
+      <polygon points="150,-80 155,-90 160,-80 155,-70" />
+      <polygon points="-120,50 -115,40 -110,50 -115,60" />
+      <polygon points="140,80 145,70 150,80 145,90" />
     </g>
-    
-    <!-- Features -->
-    <text x="500" y="320" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24">
-      ✨ 100% On-Chain ✨ Randomized Traits ✨ Base Network
-    </text>
-    
-    <!-- Price -->
-    <text x="500" y="380" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="36" font-weight="bold">
-      0.001 ETH
-    </text>
-    
-    <!-- CTA -->
-    <rect x="350" y="420" width="300" height="60" rx="30" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="2"/>
-    <text x="500" y="460" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="28" font-weight="bold">
-      Mint Now
-    </text>
   </g>
 </svg> 
