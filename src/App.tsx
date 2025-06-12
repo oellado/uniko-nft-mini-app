@@ -233,7 +233,7 @@ export default function App() {
                   fontSize: '14px', 
                   margin: '0',
                   fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
-                }}>{mintedNFTs.length} Unikō{mintedNFTs.length !== 1 ? 's' : ''} collected</p>
+                }}>{mintedNFTs.length} Unikō collected</p>
               </div>
 
               {/* 4x4 Grid - With NFTs */}
