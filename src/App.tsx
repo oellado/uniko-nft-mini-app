@@ -185,22 +185,24 @@ export default function App() {
         {/* Collection Grid */}
         <div className="flex-1 p-6">
           {mintedNFTs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center">
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">No Unikō Yet</h2>
-              <p className="text-gray-600 mb-6">Mint your first Unikō to start your collection!</p>
+            <div className="flex flex-col items-center justify-center text-center min-h-[calc(100vh-120px)]">
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-700 mb-4">No Unikō Yet</h2>
+                <p className="text-gray-600 mb-8">Mint your first Unikō to start your collection!</p>
+              </div>
               
               {/* Empty Collection Grid */}
-              <div className="grid grid-cols-4 gap-3 mb-6 max-w-xs mx-auto">
+              <div className="grid grid-cols-4 gap-3 mb-8 max-w-xs mx-auto">
                 {Array.from({ length: 16 }).map((_, index) => (
                   <div key={index} className="w-16 h-16 bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400 text-xs">• ᴗ •</span>
+                    <span className="text-gray-400 text-sm">• ᴗ •</span>
                   </div>
                 ))}
               </div>
               
               <button
                 onClick={handleBackToMint}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 Start Minting
               </button>
@@ -245,7 +247,7 @@ export default function App() {
             onClick={handleProfileClick}
             className="flex items-center hover:bg-white/20 rounded-full p-1 transition-colors"
           >
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center border-2 border-white shadow-sm">
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm">
               {userContext.user.pfpUrl ? (
                 <img 
                   src={userContext.user.pfpUrl} 
@@ -255,10 +257,9 @@ export default function App() {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
-              ) : null}
-              <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
-                {userContext.user.displayName?.[0] || userContext.user.username?.[0] || '?'}
-              </div>
+              ) : (
+                <span>{userContext.user.displayName?.[0] || userContext.user.username?.[0] || '?'}</span>
+              )}
             </div>
           </button>
         )}
