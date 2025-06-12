@@ -12,6 +12,7 @@
     "imageUrl": "https://uniko-nft-mini-app.vercel.app/og-image.svg",
     "buttonTitle": "Launch App",
     "splashImageUrl": "https://uniko-nft-mini-app.vercel.app/og-image.svg",
-    "splashBackgroundColor": "#BFDBFE"
+    "splashBackgroundColor": "#BFDBFE",
+    "webhookUrl": "https://uniko-nft-mini-app.vercel.app/api/webhook"
   }
 } 

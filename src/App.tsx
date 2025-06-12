@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
-import { sdk } from '@farcaster/frame-sdk';
 
 export default function App() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [frameContext, setFrameContext] = useState<any>(null);
+  const [isFrameEnvironment, setIsFrameEnvironment] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
+  
   const { address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
@@ -24,21 +26,35 @@ export default function App() {
   useEffect(() => {
     const initializeSDK = async () => {
       try {
-        // Get frame context
-        const context = sdk.context;
-        setFrameContext(context);
-        setIsSDKLoaded(true);
+        // Check if we're in a frame environment
+        const isFrame = window.parent !== window;
+        setIsFrameEnvironment(isFrame);
         
-        // Signal that the app is ready
-        await sdk.actions.ready();
-        console.log('Frame SDK initialized successfully');
-      } catch (error) {
-        console.log('Frame SDK not available, running in standalone mode');
+        if (isFrame) {
+          // Try to load Frame SDK
+          const { sdk } = await import('@farcaster/frame-sdk');
+          
+          // Get frame context
+          const context = sdk.context;
+          setFrameContext(context);
+          
+          // Signal that the app is ready
+          await sdk.actions.ready();
+          console.log('Frame SDK initialized successfully');
+        } else {
+          console.log('Running in standalone mode (not in frame)');
+        }
+        
         setIsSDKLoaded(true);
+      } catch (error) {
+        console.error('Frame SDK initialization error:', error);
+        setInitError(error instanceof Error ? error.message : 'Unknown error');
+        setIsSDKLoaded(true); // Continue anyway in standalone mode
       }
     };
 
-    initializeSDK();
+    // Add a small delay to ensure DOM is ready
+    setTimeout(initializeSDK, 100);
   }, []);
 
   const mintNFT = async () => {
@@ -66,17 +82,26 @@ export default function App() {
     }
   };
 
-  // Don't render until SDK is loaded
+  // Show loading screen
   if (!isSDKLoaded) {
     return (
       <div style={{ 
         display: 'flex', 
+        flexDirection: 'column',
         justifyContent: 'center', 
         alignItems: 'center', 
         height: '100vh',
-        background: 'linear-gradient(135deg, #BFDBFE 0%, #DDD6FE 100%)'
+        background: 'linear-gradient(135deg, #BFDBFE 0%, #DDD6FE 100%)',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
       }}>
-        <div>Loading...</div>
+        <div style={{ 
+          fontSize: '48px', 
+          marginBottom: '16px',
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+        }}>
+          • ᴗ •
+        </div>
+        <div style={{ fontSize: '16px', color: '#6B7280' }}>Loading Unikō...</div>
       </div>
     );
   }
@@ -137,6 +162,38 @@ export default function App() {
             </p>
           </div>
         </div>
+
+        {/* Environment Info */}
+        <div style={{
+          background: isFrameEnvironment ? '#ECFDF5' : '#FEF3C7',
+          border: `1px solid ${isFrameEnvironment ? '#D1FAE5' : '#FDE68A'}`,
+          borderRadius: '8px',
+          padding: '12px',
+          marginBottom: '16px'
+        }}>
+          <div style={{ 
+            color: isFrameEnvironment ? '#065F46' : '#92400E', 
+            fontSize: '14px', 
+            fontWeight: '500' 
+          }}>
+            {isFrameEnvironment ? '🖼️ Running in Frame' : '🌐 Standalone Mode'}
+          </div>
+        </div>
+
+        {/* Error Display */}
+        {initError && (
+          <div style={{
+            background: '#FEF2F2',
+            border: '1px solid #FECACA',
+            borderRadius: '8px',
+            padding: '12px',
+            marginBottom: '16px'
+          }}>
+            <div style={{ color: '#991B1B', fontSize: '14px' }}>
+              Init Error: {initError}
+            </div>
+          </div>
+        )}
 
         {/* Uniko NFT Preview */}
         <div style={{
