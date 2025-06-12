@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnikoNFT Preview</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+        .nft-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .nft-card:hover {
+            transform: translateY(-5px);
+        }
+        .nft-preview {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .nft-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .nft-details {
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+        }
+        .rarity {
+            display: inline-block;
+            background: #ffd700;
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+        .regular-rarity {
+            background: #e0e0e0;
+        }
+        .section {
+            margin-bottom: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>UnikoNFT Preview</h1>
+        
+        <div class="section">
+            <h2>Ultra Rare NFTs (0.01%)</h2>
+            <div class="grid" id="ultraRareGrid"></div>
+        </div>
+
+        <div class="section">
+            <h2>Regular NFTs Preview</h2>
+            <div class="grid" id="regularGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // Ultra rare definitions
+        const ultraRares = [
+            {
+                name: "nounish",
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                    <rect width="100%" height="100%" fill="#FFFFFF"/>
+                    <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#EA434A">
+                        <tspan x="43%">⌐</tspan><tspan x="50%">◨</tspan><tspan x="57%">-</tspan><tspan x="64%">◨</tspan>
+                    </text></svg>`,
+                bgColor: "#FFFFFF",
+                faceColor: "#EA434A"
+            },
+            {
+                name: "pika",
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                    <rect width="100%" height="100%" fill="#F9CC1F"/>
+                    <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI">
+                        <tspan x="35%" fill="#EA434A">⬤</tspan>
+                        <tspan x="43%" fill="#000000">-</tspan>
+                        <tspan x="50%" fill="#000000">⩊</tspan>
+                        <tspan x="57%" fill="#000000">-</tspan>
+                        <tspan x="65%" fill="#EA434A">⬤</tspan>
+                    </text></svg>`,
+                bgColor: "#F9CC1F",
+                faceColor: "red and black"
+            },
+            {
+                name: "3Dglasses",
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                    <rect width="100%" height="100%" fill="#8C8C8C"/>
+                    <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#FFFFFF">
+                        <tspan x="43%">⌐</tspan>
+                        <tspan x="50%" fill="#1625FF">■</tspan>
+                        <tspan x="57%" fill="#FFFFFF">-</tspan>
+                        <tspan x="64%" fill="#EA434A">■</tspan>
+                    </text></svg>`,
+                bgColor: "#8C8C8C",
+                faceColor: "white, blue and red"
+            },
+            {
+                name: "pepe",
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                    <rect width="100%" height="100%" fill="#577D29"/>
+                    <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI">
+                        <tspan x="33%" fill="#1625FF">∙</tspan>
+                        <tspan x="43%" fill="#000000">◒</tspan>
+                        <tspan x="50%" fill="#EA434A">ᴗ</tspan>
+                        <tspan x="57%" fill="#000000">◒</tspan>
+                        <tspan x="67%" fill="#1625FF">∙</tspan>
+                    </text></svg>`,
+                bgColor: "#577D29",
+                faceColor: "blue, black and red"
+            },
+            {
+                name: "imagine",
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                    <defs>
+                        <linearGradient id="imagineGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#FFFFFF"/>
+                            <stop offset="100%" stop-color="#88EDFF"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#imagineGradient)"/>
+                    <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI">
+                        <tspan x="37%" fill="#000000">⌐</tspan>
+                        <tspan x="45%" fill="#FFFFFF">O</tspan>
+                        <tspan x="52%" fill="#000000">-</tspan>
+                        <tspan x="58%" fill="#FFFFFF">O</tspan>
+                        <tspan x="65%" fill="#FFFFFF">✿</tspan>
+                    </text></svg>`,
+                bgColor: "gradient white to #88EDFF",
+                faceColor: "black and white"
+            },
+            {
+                name: "duo",
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                    <rect width="100%" height="100%" fill="#FFFFFF"/>
+                    <text y="50%" font-size="18" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#000000">
+                        <tspan x="27%">•</tspan><tspan x="34%">ᴗ</tspan><tspan x="41%">•</tspan>
+                        <tspan x="49%"> </tspan><tspan x="54%">/</tspan><tspan x="60%"> </tspan>
+                        <tspan x="65%">•</tspan><tspan x="72%">ᴗ</tspan><tspan x="79%">•</tspan>
+                    </text></svg>`,
+                bgColor: "#FFFFFF",
+                faceColor: "black"
+            },
+            {
+                name: "kuma",
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                    <rect width="100%" height="100%" fill="#9B6A4D"/>
+                    <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#000000">
+                        <tspan x="43%">•</tspan><tspan x="50%">ᴥ</tspan><tspan x="57%">•</tspan>
+                    </text></svg>`,
+                bgColor: "#9B6A4D",
+                faceColor: "black"
+            },
+            {
+                name: "uniko",
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                    <rect width="100%" height="100%" fill="#FFFFFF"/>
+                    <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#000000">
+                        <tspan x="43%">•</tspan><tspan x="50%">ᴗ</tspan><tspan x="57%">•</tspan>
+                    </text></svg>`,
+                bgColor: "#FFFFFF",
+                faceColor: "black"
+            },
+            {
+                name: "alien",
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                    <rect width="100%" height="100%" fill="#9DFFA2"/>
+                    <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#000000">
+                        <tspan x="35%">⟁</tspan><tspan x="43%">⬤</tspan><tspan x="50%">ᴗ</tspan><tspan x="57%">⬤</tspan><tspan x="65%">⟁</tspan>
+                    </text></svg>`,
+                bgColor: "#9DFFA2",
+                faceColor: "black"
+            },
+            {
+                name: "mochi",
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                    <defs>
+                        <linearGradient id="mochiGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#FFFFFF"/>
+                            <stop offset="100%" stop-color="#FFB6F9"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#mochiGradient)"/>
+                    <text y="50%" font-size="18" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#FA85CB">
+                        <tspan x="33%">(</tspan><tspan x="38%">•</tspan><tspan x="43%">ᴗ</tspan><tspan x="48%">•</tspan><tspan x="53%">)</tspan>
+                    </text></svg>`,
+                bgColor: "gradient white to #FFB6F9",
+                faceColor: "#FA85CB"
+            }
+        ];
+
+        // Regular trait definitions
+        const eyeTraits = "•⚆⚈⨀⦿⤬◒◓◕∸-■⊡◨∩⬗⋒";
+        const mouthTraits = "ᴗ⤻―﹏⩊ω⟀~⩌︿3.ᆺᴥʌ⎦";
+        const cheekTraits = ["^ ^", "> <", "– –", "= =", "⬤ ⬤", "~ ~", "≈ ≈", "≋ ≋", "⁕ ⁕", "∙ ∙", "∘ ∘"];
+        const accessoryTraits = "♫✿★✧☾↑♥";
+        const backgroundColors = ["#1A1A1A", "#FFFFFF", "#B29BE1", "#F9BFF2", "#FEAFAF", "#F9CC1F", "#BAE99C", "#99E2FF"];
+        const faceColors = ["#000000", "#EAEAE8", "#9774CE", "#FA85CB", "#EA434A", "#F98D70", "#57A52B", "#6B97FF"];
+
+        function generateRegularNFT(seed) {
+            // Create a more complex hash using multiple sources of randomness
+            const timestamp = Date.now();
+            const randomOffset = Math.floor(Math.random() * 1000000);
+            const complexHash = Array.from(seed + timestamp + randomOffset).reduce((acc, char) => {
+                return acc + char.charCodeAt(0) + (acc << 5) - acc;
+            }, 0);
+            
+            // Use different parts of the complex hash for different traits
+            // Increase chance of new eye traits (⬗ and ⋒) by using modulo 13 instead of length
+            // This makes the last two traits (⬗ and ⋒) appear more often
+            const eyeIndex = Math.abs(complexHash) % 13; // Changed from eyeTraits.length to 13
+            const mouthIndex = Math.abs(complexHash >> 8) % mouthTraits.length;
+            const cheekIndex = Math.abs(complexHash >> 16) % cheekTraits.length;
+            const accessoryIndex = Math.abs(complexHash >> 24) % accessoryTraits.length;
+            const bgColorIndex = Math.abs(complexHash >> 4) % backgroundColors.length;
+            const faceColorIndex = Math.abs(complexHash >> 12) % faceColors.length;
+            
+            // Use a different part of the hash for rainbow chance
+            const rainbowChance = Math.abs(complexHash >> 20) % 100;
+            const useRainbow = rainbowChance < 1; // 1% chance for rainbow
+
+            // Ensure we don't get the same eye and mouth combination too often
+            const eye = eyeTraits[eyeIndex];
+            const mouth = mouthTraits[mouthIndex];
+            const cheeks = cheekTraits[cheekIndex].split(" ");
+            const accessory = accessoryTraits[accessoryIndex];
+            
+            // Ensure background and face colors are different
+            let bgColor = useRainbow ? "url(#rainbowGradient)" : backgroundColors[bgColorIndex];
+            let faceColor = faceColors[faceColorIndex];
+            
+            // If not rainbow, ensure background and face colors are different
+            if (!useRainbow && bgColor === faceColor) {
+                faceColor = faceColors[(faceColorIndex + 1) % faceColors.length];
+            }
+
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+                ${useRainbow ? `
+                <defs>
+                    <linearGradient id="rainbowGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#B29AE1"/>
+                        <stop offset="20%" stop-color="#F8BEF1"/>
+                        <stop offset="40%" stop-color="#FDAFAE"/>
+                        <stop offset="60%" stop-color="#F8CC1F"/>
+                        <stop offset="80%" stop-color="#B9E99C"/>
+                        <stop offset="100%" stop-color="#99E1FF"/>
+                    </linearGradient>
+                </defs>` : ''}
+                <rect width="100%" height="100%" fill="${bgColor}"/>
+                <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="${faceColor}">
+                    <tspan x="35%">${cheeks[0]}</tspan>
+                    <tspan x="43%">${eye}</tspan>
+                    <tspan x="50%">${mouth}</tspan>
+                    <tspan x="57%">${eye}</tspan>
+                    <tspan x="65%">${cheeks[1]}</tspan>
+                    <tspan x="72%">${accessory}</tspan>
+                </text>
+            </svg>`;
+
+            return {
+                name: `UnikoNFT #${seed}`,
+                svg,
+                bgColor: useRainbow ? "Rainbow Gradient" : bgColor,
+                faceColor,
+                isRainbow: useRainbow
+            };
+        }
+
+        // Generate more random seeds
+        function generateSeeds() {
+            const seeds = new Set(); // Use Set to ensure unique seeds
+            while (seeds.size < 20) {
+                const timestamp = Date.now();
+                const random = Math.floor(Math.random() * 1000000);
+                seeds.add(`seed${timestamp}${random}`);
+            }
+            return Array.from(seeds);
+        }
+
+        function displayNFTs() {
+            // Display ultra rares
+            const ultraRareGrid = document.getElementById('ultraRareGrid');
+            ultraRares.forEach((nft, index) => {
+                const card = document.createElement('div');
+                card.className = 'nft-card';
+                card.innerHTML = `
+                    <div class="nft-preview">${nft.svg}</div>
+                    <div class="nft-name">${nft.name}</div>
+                    <div class="nft-details">
+                        <div>Background: ${nft.bgColor}</div>
+                        <div>Face Color: ${nft.faceColor}</div>
+                        <div class="rarity">Ultra Rare (0.01%)</div>
+                    </div>
+                `;
+                ultraRareGrid.appendChild(card);
+            });
+
+            // Display regular NFTs with random seeds
+            const regularGrid = document.getElementById('regularGrid');
+            const seeds = generateSeeds();
+            seeds.forEach(seed => {
+                const nft = generateRegularNFT(seed);
+                const card = document.createElement('div');
+                card.className = 'nft-card';
+                card.innerHTML = `
+                    <div class="nft-preview">${nft.svg}</div>
+                    <div class="nft-name">${nft.name}</div>
+                    <div class="nft-details">
+                        <div>Background: ${nft.bgColor}</div>
+                        <div>Face Color: ${nft.faceColor}</div>
+                        <div class="rarity ${nft.isRainbow ? '' : 'regular-rarity'}">${nft.isRainbow ? 'Rainbow (1%)' : 'Regular'}</div>
+                    </div>
+                `;
+                regularGrid.appendChild(card);
+            });
+        }
+
+        displayNFTs();
+    </script>
+</body>
+</html> 

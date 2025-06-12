@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Centered NFT Face</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    #nft-display {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #nft-metadata {
+      margin-top: 10px;
+    }
+
+    .square-background {
+      width: 250px;
+      height: 250px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simulate NFT Mint</h1>
+  <button onclick="mintNFT()">Mint NFT</button>
+  <div id="nft-display"></div>
+  <div id="nft-metadata"></div>
+
+  <script>
+    // Keep track if ultra-rares have minted
+    const ultraRaresMinted = {
+      nounish: false,
+      pika: false,
+      glasses3d: false,
+      fgm: false,
+      imagine: false,
+      duo: false,
+      kuma: false,
+      uniko: false,
+      alien: false,
+      mochi: false,
+    };
+
+    function mintNFT() {
+      // Ultra rare faces definitions with SVG snippet parts and metadata
+      const ultraRares = [
+        {
+          name: 'nounish',
+          chance: 0.0001, // 0.01%
+          svg: `
+            <rect width="100%" height="100%" fill="#FFFFFF" />
+            <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#EA434A">
+              <tspan x="43%">⌐</tspan>
+              <tspan x="50%">◨</tspan>
+              <tspan x="57%">-</tspan>
+              <tspan x="64%">◨</tspan>
+            </text>`,
+          metadata: {
+            face: '⌐◨-◨',
+            faceColor: '#EA434A',
+            bgColor: '#FFFFFF',
+          }
+        },
+        {
+          name: 'pika',
+          chance: 0.0001,
+          svg: `
+            <rect width="100%" height="100%" fill="#F9CC1F" />
+            <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI">
+              <tspan x="35%" fill="#EA434A">⬤</tspan>
+              <tspan x="43%" fill="#000000">-</tspan>
+              <tspan x="50%" fill="#000000">⩊</tspan>
+              <tspan x="57%" fill="#000000">-</tspan>
+              <tspan x="65%" fill="#EA434A">⬤</tspan>
+            </text>`,
+          metadata: {
+            face: '⬤-⩊-⬤',
+            faceColor: 'red and black',
+            bgColor: '#F9CC1F',
+          }
+        },
+        {
+          name: 'glasses3d',
+          chance: 0.0001,
+          svg: `
+            <rect width="100%" height="100%" fill="#8C8C8C" />
+            <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#FFFFFF">
+              <tspan x="43%">⌐</tspan>
+              <tspan x="50%" fill="#1625FF">■</tspan>
+              <tspan x="57%" fill="#FFFFFF">-</tspan>
+              <tspan x="64%" fill="#EA434A">■</tspan>
+            </text>`,
+          metadata: {
+            face: '⌐■-■',
+            faceColor: 'white, blue and red',
+            bgColor: '#8C8C8C',
+          }
+        },
+        {
+          name: 'fgm',
+          chance: 0.0001,
+          svg: `
+            <rect width="100%" height="100%" fill="#577D29" />
+            <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI">
+              <tspan x="33%" fill="#1625FF">∙</tspan>
+              <tspan x="43%" fill="#000000">◒</tspan>
+              <tspan x="50%" fill="#EA434A">ᴗ</tspan>
+              <tspan x="57%" fill="#000000">◒</tspan>
+              <tspan x="67%" fill="#1625FF">∙</tspan>
+            </text>`,
+          metadata: {
+            face: '∙◒ᴗ◒∙',
+            faceColor: 'blue, black and red',
+            bgColor: '#577D29',
+          }
+        },
+        {
+          name: 'imagine',
+          chance: 0.0001,
+          svg: `
+            <defs>
+              <linearGradient id="imagineGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFFFFF" />
+                <stop offset="100%" stop-color="#88EDFF" />
+              </linearGradient>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#imagineGradient)" />
+            <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI">
+              <tspan x="37%" fill="#000000">⌐</tspan>
+              <tspan x="45%" fill="#FFFFFF">O</tspan>
+              <tspan x="52%" fill="#000000">-</tspan>
+              <tspan x="58%" fill="#FFFFFF">O</tspan>
+              <tspan x="65%" fill="#FFFFFF">✿</tspan>
+            </text>`,
+          metadata: {
+            face: '⌐O-O✿',
+            faceColor: 'black and white',
+            bgColor: 'gradient white to #88EDFF',
+          }
+        },
+        {
+          name: 'duo',
+          chance: 0.0001,
+          svg: `
+            <rect width="100%" height="100%" fill="#FFFFFF" />
+            <text y="50%" font-size="18" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#000000">
+              <tspan x="27%">•</tspan>
+              <tspan x="34%">ᴗ</tspan>
+              <tspan x="41%">•</tspan>
+              <tspan x="49%"> </tspan>
+              <tspan x="54%">/</tspan>
+              <tspan x="60%"> </tspan>
+              <tspan x="65%">•</tspan>
+              <tspan x="72%">ᴗ</tspan>
+              <tspan x="79%">•</tspan>
+            </text>`,
+          metadata: {
+            face: '•ᴗ• / •ᴗ•',
+            faceColor: 'black',
+            bgColor: '#FFFFFF',
+          }
+        },
+        {
+          name: 'kuma',
+          chance: 0.0001,
+          svg: `
+            <rect width="100%" height="100%" fill="#9B6A4D" />
+            <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#000000">
+              <tspan x="43%">•</tspan>
+              <tspan x="50%">ᴥ</tspan>
+              <tspan x="57%">•</tspan>
+            </text>`,
+          metadata: {
+            face: '•ᴥ•',
+            faceColor: 'black',
+            bgColor: '#9B6A4D',
+          }
+        },
+        {
+          name: 'uniko',
+          chance: 0.0001,
+          svg: `
+            <rect width="100%" height="100%" fill="#FFFFFF" />
+            <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#000000">
+              <tspan x="43%">•</tspan>
+              <tspan x="50%">ᴗ</tspan>
+              <tspan x="57%">•</tspan>
+            </text>`,
+          metadata: {
+            face: '•ᴗ•',
+            faceColor: 'black',
+            bgColor: '#FFFFFF',
+          }
+        },
+        {
+          name: 'alien',
+          chance: 0.0001,
+          svg: `
+            <rect width="100%" height="100%" fill="#9DFFA2" />
+            <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#000000">
+              <tspan x="35%">⟁</tspan>
+              <tspan x="43%">⬤</tspan>
+              <tspan x="50%">ᴗ</tspan>
+              <tspan x="57%">⬤</tspan>
+              <tspan x="65%">⟁</tspan>
+            </text>`,
+          metadata: {
+            face: '⟁⬤ᴗ⬤⟁',
+            faceColor: 'black',
+            bgColor: '#9DFFA2',
+          }
+        },
+        {
+          name: 'mochi',
+          chance: 0.0001,
+          svg: `
+            <defs>
+              <linearGradient id="mochiGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFFFFF" />
+                <stop offset="100%" stop-color="#FFB6F9" />
+              </linearGradient>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#mochiGradient)" />
+            <text y="50%" font-size="18" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="#FA85CB">
+              <tspan x="35%">(</tspan>
+              <tspan x="43%">｡</tspan>
+              <tspan x="50%">ᴗ</tspan>
+              <tspan x="57%">｡</tspan>
+              <tspan x="65%">)</tspan>
+</text>`,
+metadata: {
+face: '(｡ᴗ｡)',
+faceColor: '#FA85CB',
+bgColor: 'gradient white to #FFB6F9',
+}
+},
+];
+  // Determine if minting ultra-rare
+  for (const ultra of ultraRares) {
+    if (!ultraRaresMinted[ultra.name] && Math.random() < ultra.chance) {
+      ultraRaresMinted[ultra.name] = true;
+      document.getElementById('nft-display').innerHTML = `<div class="square-background"><svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">${ultra.svg}</svg></div>`;
+      document.getElementById('nft-metadata').innerHTML = `
+        <h3>Token ID: Ultra Rare (${ultra.name})</h3>
+        <p>Face: ${ultra.metadata.face}</p>
+        <p>Face Color: ${ultra.metadata.faceColor}</p>
+        <p>Background: ${ultra.metadata.bgColor}</p>
+        <p>Accessory: None</p>
+        <p>Cheeks: None</p>
+        <p>Mouth: None</p>
+      `;
+      return;
+    }
+  }
+
+  // Normal traits mint fallback
+  const eyeTraits = ['•', '⚆', '⚈', '⨀', '⦿', '⤬', '◒', '◓', '◕', '∸', '-', '■', '⊡', '◨', '∩'];
+  const mouthTraits = ['ᴗ', '⤻', '―', '﹏', '⩊', 'ω', '⟀', '~', '⩌', '︿', '3', '.', 'ᆺ', 'ᴥ', 'ʌ', '⎦', ''];
+  const cheekTraits = ['^ ^', '> <', '– –', '= =', '⬤ ⬤', '~ ~', '≈ ≈', '≋ ≋', '⁕ ⁕', '∙ ∙', '∘ ∘', ''];
+  const accessoryTraits = ['♫', '✿', '★', '✧', '☾', '↑', '♥', ''];
+  const backgroundColors = ['#1A1A1A', '#FFFFFF', '#B29BE1', '#F9BFF2', '#FEAFAF', '#F9CC1F', '#BAE99C', '#99E2FF'];
+  const faceColors = ['#000000', '#EAEAE8', '#9774CE', '#FA85CB', '#EA434A', '#F98D70', '#57A52B', '#6B97FF'];
+  const useRainbow = Math.random() < 0.01; // 1% chance for rainbow background
+
+  const eye = eyeTraits[Math.floor(Math.random() * eyeTraits.length)];
+  const mouth = mouthTraits[Math.floor(Math.random() * mouthTraits.length)];
+  const cheeks = cheekTraits[Math.floor(Math.random() * cheekTraits.length)];
+  const accessory = accessoryTraits[Math.floor(Math.random() * accessoryTraits.length)];
+  const bgColor = backgroundColors[Math.floor(Math.random() * backgroundColors.length)];
+  const faceColor = faceColors[Math.floor(Math.random() * faceColors.length)];
+
+  const [leftCheek, rightCheek] = cheeks === '' ? [' ', ' '] : cheeks.split(' ');
+  const finalMouth = mouth === '' ? ' ' : mouth;
+  const finalAccessory = accessory === '' ? ' ' : accessory;
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+      ${useRainbow ? `
+      <defs>
+        <linearGradient id="rainbowGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#B29AE1" />
+          <stop offset="20%" stop-color="#F8BEF1" />
+          <stop offset="40%" stop-color="#FDAFAE" />
+          <stop offset="60%" stop-color="#F8CC1F" />
+          <stop offset="80%" stop-color="#B9E99C" />
+          <stop offset="100%" stop-color="#99E1FF" />
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#rainbowGradient)" />
+      ` : `<rect width="100%" height="100%" fill="${bgColor}" />`}
+      <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="${faceColor}">
+        <tspan x="35%">${leftCheek}</tspan>
+        <tspan x="43%">${eye}</tspan>
+        <tspan x="50%">${finalMouth}</tspan>
+        <tspan x="57%">${eye}</tspan>
+        <tspan x="65%">${rightCheek}</tspan>
+        <tspan x="72%">${finalAccessory}</tspan>
+      </text>
+    </svg>
+  `;
+
+  document.getElementById('nft-display').innerHTML = `<div class="square-background">${svg}</div>`;
+
+  const tokenId = Math.floor(Math.random() * 1000);
+  document.getElementById('nft-metadata').innerHTML = `
+    <h3>Token ID: ${tokenId}</h3>
+    <p>Eyes: ${eye}</p>
+    <p>Mouth: ${mouth || 'None'}</p>
+    <p>Cheeks: ${cheeks || 'None'}</p>
+    <p>Accessory: ${accessory || 'None'}</p>
+    <p>Background: ${useRainbow ? 'Rainbow Gradient' : bgColor}</p>
+    <p>Face Color: ${faceColor}</p>
+  `;
+}
+</script> </body> </html> ```

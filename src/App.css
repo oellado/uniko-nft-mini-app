@@ -1,0 +1,101 @@
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background: #1a1a1a;
+  color: white;
+}
+
+.App-header {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.connect-button, .preview-button {
+  background: #6B97FF;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin: 1rem;
+}
+
+.connect-button:hover, .preview-button:hover {
+  background: #5a86ff;
+}
+
+.preview-button:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+.preview-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #2a2a2a;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.preview-result {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nft-preview {
+  width: 250px;
+  height: 250px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.preview-info {
+  text-align: left;
+  padding: 1rem;
+  background: #333;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.ultra-rare {
+  text-align: center;
+  color: #F9CC1F;
+  padding: 1rem;
+  background: rgba(249, 204, 31, 0.1);
+  border-radius: 8px;
+}
+
+.attributes {
+  color: #ccc;
+}
+
+.attributes pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+  font-size: 0.9rem;
+  margin: 0;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-radius: 4px;
+}
+
+.error {
+  color: #ff6b6b;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 4px;
+} 

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Centered NFT Face</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    #nft-display {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #nft-metadata {
+      margin-top: 10px;
+    }
+
+    .square-background {
+      width: 250px;
+      height: 250px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simulate NFT Mint</h1>
+  <button onclick="mintNFT()">Mint NFT</button>
+  <div id="nft-display"></div>
+  <div id="nft-metadata"></div>
+
+  <script>
+    function mintNFT() {
+      const eyeTraits = ['•', 'o', '⚆', '⚈', '⨀', '⦿', '⤬', '◒', '◓', '◕', '∸', '-', '■', '⊡', '◨', '∩'];
+      const mouthTraits = ['ᴗ', '‿', '⤻', '―', '﹏', '⩊', 'ω', '⟁', '⟀', '~', '⩌', '︿', '3', '.', 'ᆺ', 'ᴥ', 'ʌ', '⎦', ''];
+      const cheekTraits = ['^ ^', '– –', '= =', '⬤ ⬤', '~ ~', '≈ ≈', '≋ ≋', '⁕ ⁕', '∙ ∙', '∘ ∘', ''];
+      const accessoryTraits = ['♫', '✿', '★', '✧', '☾', '↑', '♥', ''];
+      const backgroundColors = ['#1A1A1A', '#FFFFFF', '#B29BE1', '#F9BFF2', '#FEAFAF', '#F9CC1F', '#BAE99C', '#99E2FF'];
+      const faceColors = ['#000000', '#EAEAE8', '#9774CE', '#FA85CB', '#EA434A', '#F98D70', '#57A52B', '#6B97FF'];
+
+      const eye = eyeTraits[Math.floor(Math.random() * eyeTraits.length)];
+      const mouth = mouthTraits[Math.floor(Math.random() * mouthTraits.length)];
+      const cheeks = cheekTraits[Math.floor(Math.random() * cheekTraits.length)];
+      const accessory = accessoryTraits[Math.floor(Math.random() * accessoryTraits.length)];
+      const bgColor = backgroundColors[Math.floor(Math.random() * backgroundColors.length)];
+      const faceColor = faceColors[Math.floor(Math.random() * faceColors.length)];
+
+      const [leftCheek, rightCheek] = cheeks === '' ? [' ', ' '] : cheeks.split(' ');
+      const finalMouth = mouth === '' ? ' ' : mouth;
+      const finalAccessory = accessory === '' ? ' ' : accessory;
+
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+          <rect width="100%" height="100%" fill="${bgColor}" />
+          <text y="50%" font-size="20" text-anchor="middle" dominant-baseline="central" font-family="Segoe UI" fill="${faceColor}">
+            <tspan x="35%">${leftCheek}</tspan>
+            <tspan x="43%">${eye}</tspan>
+            <tspan x="50%">${finalMouth}</tspan>
+            <tspan x="57%">${eye}</tspan>
+            <tspan x="65%">${rightCheek}</tspan>
+            <tspan x="72%">${finalAccessory}</tspan>
+          </text>
+        </svg>
+      `;
+
+      document.getElementById('nft-display').innerHTML = `<div class="square-background">${svg}</div>`;
+
+      const tokenId = Math.floor(Math.random() * 1000);
+      document.getElementById('nft-metadata').innerHTML = `
+        <h3>Token ID: ${tokenId}</h3>
+        <p>Eyes: ${eye}</p>
+        <p>Mouth: ${mouth || 'None'}</p>
+        <p>Cheeks: ${cheeks || 'None'}</p>
+        <p>Accessory: ${accessory || 'None'}</p>
+        <p>Background Color: ${bgColor}</p>
+        <p>Face Color: ${faceColor}</p>
+      `;
+    }
+  </script>
+</body>
+</html>
