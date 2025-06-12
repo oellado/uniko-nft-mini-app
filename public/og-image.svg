@@ -20,7 +20,7 @@
   <text x="600" y="200" font-family="Inter, system-ui, sans-serif" font-size="80" font-weight="800" text-anchor="middle" fill="url(#text)">Unikō</text>
   
   <!-- Subtitle -->
-  <text x="600" y="240" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="600" text-anchor="middle" fill="#374151">A cute on-chain companion</text>
+  <text x="600" y="240" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="600" text-anchor="middle" fill="#374151">Your cute onchain companions</text>
   
   <!-- Basic Uniko NFT Preview (white background, simple face) -->
   <rect x="450" y="280" width="300" height="300" rx="16" fill="white" stroke="#E5E7EB" stroke-width="3"/>
@@ -31,5 +31,5 @@
   <text x="650" y="450" font-family="system-ui, sans-serif" font-size="32" text-anchor="middle" fill="#000">•</text>
   
   <!-- Bottom text -->
-  <text x="600" y="620" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" text-anchor="middle" fill="#6B7280">100% onchain generative project by @miguelgarest.eth</text>
+  <text x="600" y="620" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" text-anchor="middle" fill="#6B7280">Generative project by @miguelgarest.eth</text>
 </svg> 

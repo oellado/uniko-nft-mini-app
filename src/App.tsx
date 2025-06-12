@@ -400,8 +400,8 @@ export default function App() {
             fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
             fontWeight: '600'
           }}>
-            <p style={{ margin: '0 0 3px 0' }}>A cute on-chain companion</p>
-            <p style={{ margin: '0 0 3px 0' }}>100% onchain generative project</p>
+            <p style={{ margin: '0 0 3px 0' }}>Your cute onchain companions</p>
+            <p style={{ margin: '0 0 3px 0' }}>generative project</p>
             <p style={{ margin: '0' }}>
               by{' '}
               <a 
