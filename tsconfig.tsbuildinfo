@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/config.ts","./src/main.tsx","./src/wagmi.ts","./src/components/errorsheet.tsx","./src/components/mintbutton.tsx","./src/components/previewsection.tsx","./src/components/successsheet.tsx","./src/components/unikocard.tsx","./src/lib/contract.ts","./src/lib/utils.ts"],"version":"5.6.3"}
