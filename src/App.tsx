@@ -1,10 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { generateUnikoNFT, generatePreviewNFT } from './config';
+
+// Farcaster SDK types
+declare global {
+  interface Window {
+    farcasterFrame?: {
+      context?: any;
+      actions?: {
+        ready: () => Promise<void>;
+        close: (options?: { toast?: { message: string } }) => Promise<void>;
+      };
+    };
+  }
+}
 
 export default function App() {
   const [isMinting, setIsMinting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [displayNFT, setDisplayNFT] = useState(() => generatePreviewNFT());
+  const [isFrameContext, setIsFrameContext] = useState(false);
+
+  useEffect(() => {
+    // Check if running in Farcaster Frame context
+    if (window.farcasterFrame) {
+      setIsFrameContext(true);
+      // Signal that the Mini App is ready
+      window.farcasterFrame.actions?.ready?.();
+    }
+  }, []);
 
   const handleMint = async () => {
     try {

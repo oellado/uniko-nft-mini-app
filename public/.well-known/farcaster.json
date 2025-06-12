@@ -5,11 +5,12 @@
     "signature": "MHhkNDNkNzJjNzc5ZGY4YzI0MjQ0ZGE0ZjZiZjZkNjBkNzQxYWE5ZjM2"
   },
   "frame": {
-    "name": "UnikoNFT Mini App",
+    "version": "1",
+    "name": "UnikoNFT",
     "iconUrl": "https://uniko-nft-mini-app.vercel.app/og-image.svg",
-    "homeUrl": "https://uniko-nft-mini-app.vercel.app/mini-app",
+    "homeUrl": "https://uniko-nft-mini-app.vercel.app",
     "imageUrl": "https://uniko-nft-mini-app.vercel.app/og-image.svg",
-    "buttonTitle": "Mint Uniko NFT",
+    "buttonTitle": "Launch Uniko NFT",
     "splashImageUrl": "https://uniko-nft-mini-app.vercel.app/og-image.svg",
     "splashBackgroundColor": "#667eea",
     "webhookUrl": "https://uniko-nft-mini-app.vercel.app/api/webhook"
