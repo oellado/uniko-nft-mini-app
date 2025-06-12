@@ -4,9 +4,6 @@ import { parseEther } from 'viem';
 
 export default function App() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
-  const [frameContext, setFrameContext] = useState<any>(null);
-  const [isFrameEnvironment, setIsFrameEnvironment] = useState(false);
-  const [initError, setInitError] = useState<string | null>(null);
   
   const { address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
@@ -28,15 +25,10 @@ export default function App() {
       try {
         // Check if we're in a frame environment
         const isFrame = window.parent !== window;
-        setIsFrameEnvironment(isFrame);
         
         if (isFrame) {
           // Try to load Frame SDK
           const { sdk } = await import('@farcaster/frame-sdk');
-          
-          // Get frame context
-          const context = sdk.context;
-          setFrameContext(context);
           
           // Signal that the app is ready
           await sdk.actions.ready();
@@ -48,7 +40,6 @@ export default function App() {
         setIsSDKLoaded(true);
       } catch (error) {
         console.error('Frame SDK initialization error:', error);
-        setInitError(error instanceof Error ? error.message : 'Unknown error');
         setIsSDKLoaded(true); // Continue anyway in standalone mode
       }
     };
