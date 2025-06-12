@@ -1,9 +1,4 @@
 {
-  "accountAssociation": {
-    "header": "eyJmaWQiOjEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhkNDNkNzJjNzc5ZGY4YzI0MjQ0ZGE0ZjZiZjZkNjBkNzQxYWE5ZjM2In0",
-    "payload": "eyJkb21haW4iOiJ1bmlrby1uZnQtbWluaS1hcHAudmVyY2VsLmFwcCJ9",
-    "signature": "MHhkNDNkNzJjNzc5ZGY4YzI0MjQ0ZGE0ZjZiZjZkNjBkNzQxYWE5ZjM2"
-  },
   "frame": {
     "version": "1",
     "name": "UnikoNFT",
@@ -12,7 +7,6 @@
     "imageUrl": "https://uniko-nft-mini-app.vercel.app/og-image.svg",
     "buttonTitle": "Launch Uniko NFT",
     "splashImageUrl": "https://uniko-nft-mini-app.vercel.app/og-image.svg",
-    "splashBackgroundColor": "#667eea",
-    "webhookUrl": "https://uniko-nft-mini-app.vercel.app/api/webhook"
+    "splashBackgroundColor": "#667eea"
   }
 } 
