@@ -163,37 +163,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Environment Info */}
-        <div style={{
-          background: isFrameEnvironment ? '#ECFDF5' : '#FEF3C7',
-          border: `1px solid ${isFrameEnvironment ? '#D1FAE5' : '#FDE68A'}`,
-          borderRadius: '8px',
-          padding: '12px',
-          marginBottom: '16px'
-        }}>
-          <div style={{ 
-            color: isFrameEnvironment ? '#065F46' : '#92400E', 
-            fontSize: '14px', 
-            fontWeight: '500' 
-          }}>
-            {isFrameEnvironment ? '🖼️ Running in Frame' : '🌐 Standalone Mode'}
-          </div>
-        </div>
 
-        {/* Error Display */}
-        {initError && (
-          <div style={{
-            background: '#FEF2F2',
-            border: '1px solid #FECACA',
-            borderRadius: '8px',
-            padding: '12px',
-            marginBottom: '16px'
-          }}>
-            <div style={{ color: '#991B1B', fontSize: '14px' }}>
-              Init Error: {initError}
-            </div>
-          </div>
-        )}
 
         {/* Uniko NFT Preview */}
         <div style={{
@@ -324,21 +294,7 @@ export default function App() {
           </button>
         )}
 
-        {/* Debug Info for Frame Context */}
-        {frameContext && (
-          <div style={{
-            marginTop: '20px',
-            padding: '12px',
-            background: '#F3F4F6',
-            borderRadius: '8px',
-            fontSize: '12px',
-            color: '#6B7280'
-          }}>
-            <strong>Frame Context:</strong><br/>
-            User: {frameContext.user?.username || 'Unknown'}<br/>
-            Client: {frameContext.client?.clientFid || 'Standalone'}
-          </div>
-        )}
+
       </div>
     </div>
   );
