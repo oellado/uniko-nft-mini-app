@@ -1,15 +1,9 @@
 {
   "functions": {
     "api/frame.js": {
-      "runtime": "nodejs18.x"
+      "runtime": "@vercel/node"
     }
   },
-  "rewrites": [
-    {
-      "source": "/api/frame",
-      "destination": "/api/frame.js"
-    }
-  ],
   "headers": [
     {
       "source": "/api/(.*)",
