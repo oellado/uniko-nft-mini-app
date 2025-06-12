@@ -18,12 +18,9 @@ export default function App() {
   const [isMinting, setIsMinting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [displayNFT, setDisplayNFT] = useState(() => generatePreviewNFT());
-  const [isFrameContext, setIsFrameContext] = useState(false);
-
   useEffect(() => {
-    // Check if running in Farcaster Frame context
+    // Check if running in Farcaster Frame context and signal ready
     if (window.farcasterFrame) {
-      setIsFrameContext(true);
       // Signal that the Mini App is ready
       window.farcasterFrame.actions?.ready?.();
     }
