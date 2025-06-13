@@ -21,6 +21,10 @@ export default function App() {
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [lastMintedTokenId, setLastMintedTokenId] = useState<number | null>(null);
   
+  // Farcaster user context
+  const [userPfp, setUserPfp] = useState<string | null>(null);
+  const [pfpError, setPfpError] = useState(false);
+  
   const itemsPerPage = 16;
   const mintButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -42,13 +46,21 @@ export default function App() {
       try {
         await sdk.actions.ready();
         
-        // Show add frame prompt for new users
+        // Get user context and PFP
         const context = await sdk.context;
-        if (context?.user && !localStorage.getItem('uniko-frame-prompted')) {
-          setTimeout(() => {
-            sdk.actions.addFrame();
-            localStorage.setItem('uniko-frame-prompted', 'true');
-          }, 2000);
+        if (context?.user) {
+          // Set user PFP if available
+          if (context.user.pfpUrl) {
+            setUserPfp(context.user.pfpUrl);
+          }
+          
+          // Show add frame prompt for new users
+          if (!localStorage.getItem('uniko-frame-prompted')) {
+            setTimeout(() => {
+              sdk.actions.addFrame();
+              localStorage.setItem('uniko-frame-prompted', 'true');
+            }, 2000);
+          }
         }
       } catch (error) {
         console.error('Failed to initialize SDK:', error);
@@ -89,6 +101,13 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [errorToast]);
+
+  // Reset effect: Ensure app always starts with preview NFT
+  useEffect(() => {
+    // On app load, always show preview NFT
+    setDisplayNFT(generatePreviewNFT());
+    setLastMintedTokenId(null);
+  }, []);
 
   // Read user's NFT balance
   const { data: balance } = useReadContract({
@@ -235,53 +254,74 @@ export default function App() {
     }
   };
 
-  // Fetch user's NFTs from blockchain
+  // Fetch user's NFTs with improved performance and error handling
   const fetchUserNFTs = async () => {
     if (!address || !balance || !totalSupply) {
       return;
     }
     
     setIsLoadingNFTs(true);
+    
     try {
-      const userNFTs = [];
       const supply = Number(totalSupply);
       
-      // Check each token to see if user owns it
-      for (let tokenId = 1; tokenId <= supply; tokenId++) {
-        try {
-          // Check if user owns this token
-          const owner = await readContract(config, {
-            address: CONTRACT_ADDRESS,
-            abi: CONTRACT_ABI,
-            functionName: 'ownerOf',
-            args: [BigInt(tokenId)]
-          });
-          
-          if (owner.toLowerCase() === address.toLowerCase()) {
-            const nft = await fetchNFTData(tokenId);
-            if (nft) {
-              userNFTs.push(nft);
-            }
-          }
-        } catch (error) {
-          // Token might not exist or other error, continue
-          continue;
-        }
+      // Create array of promises to check ownership in parallel
+      const ownershipChecks = Array.from({ length: supply }, (_, i) => {
+        const tokenId = i + 1;
+        return readContract(config, {
+          address: CONTRACT_ADDRESS,
+          abi: CONTRACT_ABI,
+          functionName: 'ownerOf',
+          args: [BigInt(tokenId)]
+        }).then(owner => ({
+          tokenId,
+          owner: owner.toLowerCase(),
+          isOwned: owner.toLowerCase() === address.toLowerCase()
+        })).catch(() => ({
+          tokenId,
+          owner: null,
+          isOwned: false
+        }));
+      });
+      
+      // Wait for all ownership checks to complete
+      const ownershipResults = await Promise.all(ownershipChecks);
+      
+      // Filter to get only user's tokens
+      const userTokenIds = ownershipResults
+        .filter(result => result.isOwned)
+        .map(result => result.tokenId);
+      
+      if (userTokenIds.length === 0) {
+        setMintedNFTs([]);
+        return;
       }
       
-      // Sort NFTs by tokenId (newest first)
-      userNFTs.sort((a, b) => b.tokenId - a.tokenId);
+      // Fetch NFT data for user's tokens in parallel
+      const nftDataPromises = userTokenIds.map(tokenId => 
+        fetchNFTData(tokenId).catch(error => {
+          console.error(`Error fetching NFT data for token ${tokenId}:`, error);
+          return null;
+        })
+      );
+      
+      const nftDataResults = await Promise.all(nftDataPromises);
+      
+      // Filter out null results and sort by token ID (newest first)
+      const userNFTs = nftDataResults
+        .filter(nft => nft !== null)
+        .sort((a, b) => b.tokenId - a.tokenId);
       
       setMintedNFTs(userNFTs);
       
-      // If user has NFTs and we're not showing collection, show their newest one
-      if (userNFTs.length > 0 && !showCollection && !lastMintedTokenId) {
-        setDisplayNFT(userNFTs[0]);
-      }
-      
     } catch (error) {
       console.error('Error fetching user NFTs:', error);
-      setErrorToast('Failed to load your NFTs');
+      setErrorToast('Failed to load your NFTs. Please try again.');
+      
+      // Retry after a short delay
+      setTimeout(() => {
+        fetchUserNFTs();
+      }, 2000);
     } finally {
       setIsLoadingNFTs(false);
     }
@@ -354,21 +394,12 @@ export default function App() {
 
   const handleBackToMint = () => {
     setShowCollection(false);
-    // Show the latest minted NFT if available, otherwise show preview
-    if (lastMintedTokenId && mintedNFTs.length > 0) {
-      const latestNFT = mintedNFTs.find(nft => nft.tokenId === lastMintedTokenId);
-      if (latestNFT) {
-        setDisplayNFT(latestNFT);
-      } else if (mintedNFTs.length > 0) {
-        setDisplayNFT(mintedNFTs[0]);
-      } else {
-        setDisplayNFT(generatePreviewNFT());
-      }
-    } else if (mintedNFTs.length > 0) {
-      setDisplayNFT(mintedNFTs[0]);
-    } else {
-      setDisplayNFT(generatePreviewNFT());
-    }
+    setSelectedNFT(null);
+    setCurrentPage(1);
+    
+    // CRITICAL FIX: ALWAYS show generic preview when returning to main screen
+    setDisplayNFT(generatePreviewNFT());
+    setLastMintedTokenId(null); // Clear the last minted token to prevent confusion
   };
 
   const handleNFTClick = (nft: any) => {
@@ -536,7 +567,48 @@ export default function App() {
             backgroundClip: 'text',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
           }}>My Unikō Collection</h1>
-          <div style={{ width: '48px' }}></div>
+          
+          {/* Profile Picture in Collection */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            borderRadius: '50%', 
+            padding: '2px'
+          }}>
+            {userPfp && !pfpError ? (
+              <img 
+                src={userPfp} 
+                alt="Profile"
+                onError={() => setPfpError(true)}
+                style={{ 
+                  width: '28px', 
+                  height: '28px', 
+                  borderRadius: '50%', 
+                  border: '2px solid white', 
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  objectFit: 'cover'
+                }}
+              />
+            ) : (
+              <div style={{ 
+                width: '28px', 
+                height: '28px', 
+                borderRadius: '50%', 
+                background: 'linear-gradient(135deg, #60A5FA 0%, #A855F7 100%)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                color: 'white', 
+                fontSize: '11px', 
+                fontWeight: 'bold', 
+                border: '2px solid white', 
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+              }}>
+                ?
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Collection Content */}
@@ -800,10 +872,11 @@ export default function App() {
             cursor: 'pointer' 
           }}
         >
-          {displayNFT.pfpUrl && displayNFT.pfpUrl !== 'https://i.imgur.com/placeholder.jpg' ? (
+          {userPfp && !pfpError ? (
             <img 
-              src={displayNFT.pfpUrl} 
+              src={userPfp} 
               alt="Profile"
+              onError={() => setPfpError(true)}
               style={{ 
                 width: '28px', 
                 height: '28px', 
@@ -829,7 +902,7 @@ export default function App() {
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
               fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
             }}>
-              {displayNFT.displayName?.[0] || '?'}
+              ?
             </div>
           )}
         </button>
@@ -999,19 +1072,7 @@ export default function App() {
           Share
         </button>
 
-        {/* Success Message */}
-        {isSuccess && (
-          <div style={{
-            color: '#059669',
-            fontSize: '14px',
-            fontWeight: '600',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
-            textAlign: 'center',
-            animation: 'fadeInOut 3s ease-in-out'
-          }}>
-            •ᴗ• Successfully minted!
-          </div>
-        )}
+
 
         {/* Wallet Connection Status */}
         {!isConnected && (
