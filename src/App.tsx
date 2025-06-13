@@ -56,14 +56,16 @@ export default function App() {
     initSDK();
   }, []);
 
-  // Fetch user's NFTs when wallet connects
+  // Fetch user's NFTs when wallet connects or when balance/supply changes
   useEffect(() => {
-    if (isConnected && address) {
+    if (isConnected && address && balance !== undefined && totalSupply !== undefined) {
       fetchUserNFTs();
-    } else {
+    } else if (!isConnected) {
       setMintedNFTs([]);
+      // Reset to preview NFT when disconnected
+      setDisplayNFT(generatePreviewNFT());
     }
-  }, [isConnected, address]);
+  }, [isConnected, address, balance, totalSupply]);
 
   // Read user's NFT balance
   const { data: balance } = useReadContract({
@@ -118,55 +120,55 @@ export default function App() {
               args: [BigInt(tokenId)]
             });
             
-                          // Parse metadata and create NFT object
-              try {
-                const parsedMetadata = JSON.parse(metadata);
-                
-                // Decode base64 SVG with proper UTF-8 handling
-                let svgContent = '';
-                if (parsedMetadata.image && parsedMetadata.image.includes('data:image/svg+xml;base64,')) {
-                  const base64Data = parsedMetadata.image.replace('data:image/svg+xml;base64,', '');
-                  try {
-                    // Proper UTF-8 decoding for Unicode characters
-                    const binaryString = atob(base64Data);
-                    const bytes = new Uint8Array(binaryString.length);
-                    for (let i = 0; i < binaryString.length; i++) {
-                      bytes[i] = binaryString.charCodeAt(i);
-                    }
-                    svgContent = new TextDecoder('utf-8').decode(bytes);
-                  } catch (decodeError) {
-                    console.error(`Error decoding SVG for token ${tokenId}:`, decodeError);
-                    // Fallback: try simple atob
-                    try {
-                      svgContent = atob(base64Data);
-                    } catch {
-                      svgContent = parsedMetadata.image; // final fallback
-                    }
+            // Parse metadata and create NFT object
+            try {
+              const parsedMetadata = JSON.parse(metadata);
+              
+              // Decode base64 SVG with proper UTF-8 handling
+              let svgContent = '';
+              if (parsedMetadata.image && parsedMetadata.image.includes('data:image/svg+xml;base64,')) {
+                const base64Data = parsedMetadata.image.replace('data:image/svg+xml;base64,', '');
+                try {
+                  // Proper UTF-8 decoding for Unicode characters
+                  const binaryString = atob(base64Data);
+                  const bytes = new Uint8Array(binaryString.length);
+                  for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
                   }
-                } else {
-                  svgContent = parsedMetadata.image || '';
+                  svgContent = new TextDecoder('utf-8').decode(bytes);
+                } catch (decodeError) {
+                  console.error(`Error decoding SVG for token ${tokenId}:`, decodeError);
+                  // Fallback: try simple atob
+                  try {
+                    svgContent = atob(base64Data);
+                  } catch {
+                    svgContent = parsedMetadata.image; // final fallback
+                  }
                 }
-                
-                const nft = {
-                  tokenId,
-                  name: parsedMetadata.name,
-                  svg: svgContent,
-                  isUltraRare,
-                  traits: {} as Record<string, any>
-                };
-                
-                // Extract traits from attributes
-                if (parsedMetadata.attributes) {
-                  parsedMetadata.attributes.forEach((attr: any) => {
-                    const traitKey = attr.trait_type.toLowerCase().replace(/\s+/g, '');
-                    nft.traits[traitKey] = attr.value;
-                  });
-                }
-                
-                userNFTs.push(nft);
-              } catch (parseError) {
-                console.error(`Error parsing metadata for token ${tokenId}:`, parseError);
+              } else {
+                svgContent = parsedMetadata.image || '';
               }
+              
+              const nft = {
+                tokenId,
+                name: parsedMetadata.name,
+                svg: svgContent,
+                isUltraRare,
+                traits: {} as Record<string, any>
+              };
+              
+              // Extract traits from attributes
+              if (parsedMetadata.attributes) {
+                parsedMetadata.attributes.forEach((attr: any) => {
+                  const traitKey = attr.trait_type.toLowerCase().replace(/\s+/g, '');
+                  nft.traits[traitKey] = attr.value;
+                });
+              }
+              
+              userNFTs.push(nft);
+            } catch (parseError) {
+              console.error(`Error parsing metadata for token ${tokenId}:`, parseError);
+            }
           }
         } catch (error) {
           // Token might not exist or other error, continue
@@ -174,7 +176,15 @@ export default function App() {
         }
       }
       
+      // Sort NFTs by tokenId (newest first)
+      userNFTs.sort((a, b) => b.tokenId - a.tokenId);
+      
       setMintedNFTs(userNFTs);
+      
+      // Set the first (newest) NFT as display NFT if user has NFTs and no current display NFT with tokenId
+      if (userNFTs.length > 0 && (!displayNFT.tokenId || displayNFT.tokenId === undefined)) {
+        setDisplayNFT(userNFTs[0]);
+      }
     } catch (error) {
       console.error('Error fetching user NFTs:', error);
     } finally {
@@ -187,22 +197,22 @@ export default function App() {
     if (isSuccess && !successHandled.current) {
       successHandled.current = true;
       
-      // Generate NFT for display
-      const newNFT = generateUnikoNFT(`seed-${Date.now()}-${Math.random()}`);
-      setMintedNFTs(prev => [...prev, newNFT]);
-      setDisplayNFT(newNFT);
       setShowSuccess(true);
       
       // Hide success message after 3 seconds
       setTimeout(() => setShowSuccess(false), 3000);
       
-      // Refresh user's NFTs after successful mint
-      setTimeout(() => fetchUserNFTs(), 5000);
+      // Refresh user's NFTs immediately after successful mint
+      setTimeout(() => {
+        if (isConnected && address) {
+          fetchUserNFTs();
+        }
+      }, 2000);
       
       setHash(undefined);
       successHandled.current = false;
     }
-  }, [isSuccess]);
+  }, [isSuccess, isConnected, address]);
 
   // Auto-hide error toast after 3 seconds
   useEffect(() => {
