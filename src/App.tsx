@@ -14,7 +14,6 @@ export default function App() {
   const [contextUser, setContextUser] = useState<any>(null);
   const itemsPerPage = 16;
   const mintButtonRef = useRef<HTMLButtonElement>(null);
-  const testButtonRef = useRef<HTMLButtonElement>(null);
 
   // Wagmi hooks
   const { address, isConnected } = useAccount();
@@ -102,26 +101,7 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => {
-    const testButton = testButtonRef.current;
 
-    if (testButton) {
-      const handleNativeTestClick = (e: Event) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('🎯 Native test click detected!');
-        alert('NATIVE TEST BUTTON WORKS!');
-      };
-
-      testButton.addEventListener('click', handleNativeTestClick, { passive: false });
-      testButton.addEventListener('touchend', handleNativeTestClick, { passive: false });
-      
-      return () => {
-        testButton.removeEventListener('click', handleNativeTestClick);
-        testButton.removeEventListener('touchend', handleNativeTestClick);
-      };
-    }
-  }, []);
 
   // Use SDK context for user data, fallback to wallet address
   const mockUser = {
@@ -132,10 +112,7 @@ export default function App() {
   };
 
   const handleMint = async () => {
-    // Basic test - this should ALWAYS show if button click works
-    console.log('🎯 MINT BUTTON CLICKED - BASIC TEST');
-    alert('MINT BUTTON CLICKED - If you see this, the button works!');
-    
+    console.log('🎯 Mint button clicked!');
     console.log('🔗 Connected:', isConnected);
     console.log('📍 Address:', address);
     console.log('🔌 Available Connectors:', availableConnectors);
@@ -763,30 +740,6 @@ export default function App() {
             )}
           </div>
         </div>
-
-        {/* Test Button - Simple Click Test */}
-        <button
-          ref={testButtonRef}
-          onMouseDown={() => alert('TEST BUTTON WORKS!')}
-          onTouchStart={() => alert('TEST BUTTON WORKS!')}
-          onClick={() => alert('TEST BUTTON WORKS!')}
-          style={{ 
-            backgroundColor: '#10B981', 
-            color: 'white', 
-            fontWeight: '600', 
-            padding: '8px 16px', 
-            borderRadius: '6px', 
-            border: 'none',
-            fontSize: '12px', 
-            cursor: 'pointer',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
-            marginBottom: '8px',
-            WebkitTapHighlightColor: 'transparent',
-            touchAction: 'manipulation'
-          }}
-        >
-          TEST BUTTON
-        </button>
 
         {/* Mint Button */}
         <button
