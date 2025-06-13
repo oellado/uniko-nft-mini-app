@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAccount, useConnect } from 'wagmi';
+import { useAccount, useConnect, useConnectors, useChainId } from 'wagmi';
 import { generatePreviewNFT, generateUnikoNFT } from './config';
 
 export default function App() {
@@ -17,6 +17,8 @@ export default function App() {
   // Wagmi hooks
   const { address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
+  const chainId = useChainId();
+  const availableConnectors = useConnectors();
 
   useEffect(() => {
     const initializeSDK = async () => {
@@ -76,19 +78,21 @@ export default function App() {
   };
 
   const handleMint = async () => {
-    alert('Mint button clicked! Check console for details.');
     console.log('🎯 Mint button clicked!');
     console.log('🔗 Connected:', isConnected);
     console.log('📍 Address:', address);
-    console.log('🔌 Connector:', connector);
-    console.log('🌐 Chain:', chain);
+    console.log('🔌 Available Connectors:', availableConnectors);
+    console.log('🌐 Chain ID:', chainId);
     
     // Force wallet connection if not connected
     if (!isConnected) {
       console.log('❌ Not connected, attempting to connect...');
       try {
-        await connect({ connector: connectors[0] });
+        // Import farcasterFrame connector
+        const { farcasterFrame } = await import('@farcaster/frame-wagmi-connector');
+        await connect({ connector: farcasterFrame() });
         console.log('✅ Connection attempt made');
+        return; // Exit here, let the user click again after connection
       } catch (error) {
         console.error('❌ Connection failed:', error);
         alert('Please connect your wallet first!');
@@ -124,21 +128,29 @@ export default function App() {
       const { config } = await import('./wagmi');
       const { contractConfig } = await import('./config');
 
+      console.log('📝 Calling mint function with:', {
+        address: contractConfig.address,
+        functionName: 'mint',
+        args: [address!, metadata],
+        value: '1000000000000000'
+      });
+
       const hash = await writeContract(config, {
         address: contractConfig.address,
         abi: contractConfig.abi,
         functionName: 'mint',
         args: [address!, metadata],
         value: BigInt('1000000000000000'), // 0.001 ETH in wei
+        chainId: 84532, // Base Sepolia
       });
 
-      console.log('Transaction hash:', hash);
+      console.log('✅ Transaction hash:', hash);
       
       // Wait for transaction confirmation
       const { waitForTransactionReceipt } = await import('wagmi/actions');
       const receipt = await waitForTransactionReceipt(config, { hash });
       
-      console.log('Transaction confirmed:', receipt);
+      console.log('✅ Transaction confirmed:', receipt);
 
       // Add to local state after successful mint
       setMintedNFTs(prev => [...prev, newNFT]);
@@ -705,14 +717,12 @@ export default function App() {
             fontWeight: '600', 
             padding: '12px 24px', 
             borderRadius: '8px', 
-            border: '2px solid red', // DEBUG: Red border to see button
+            border: 'none',
             fontSize: '16px', 
             boxShadow: '0 6px 16px rgba(0, 0, 0, 0.1)', 
             cursor: isMinting ? 'not-allowed' : 'pointer',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
-            marginBottom: '8px',
-            zIndex: 1000, // DEBUG: Ensure button is on top
-            position: 'relative' // DEBUG: Ensure button positioning
+            marginBottom: '8px'
           }}
         >
           {isMinting ? "Minting..." : "Mint • 0.001 ETH"}
