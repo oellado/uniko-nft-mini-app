@@ -49,13 +49,20 @@ export default function App() {
 
   // Auto-connect to Farcaster wallet if available
   useEffect(() => {
+    console.log('🔄 Connection check:', { isSDKLoaded, isConnected, connectorsCount: connectors.length });
+    
     if (isSDKLoaded && !isConnected && connectors.length > 0) {
+      console.log('🔍 Available connectors:', connectors.map(c => ({ id: c.id, name: c.name })));
       const farcasterConnector = connectors.find(c => c.id === 'farcasterFrame');
+      
       if (farcasterConnector) {
+        console.log('✅ Found Farcaster connector, attempting to connect...');
         // Small delay to ensure SDK is fully ready
         setTimeout(() => {
           connect({ connector: farcasterConnector });
         }, 100);
+      } else {
+        console.log('❌ No Farcaster connector found');
       }
     }
   }, [isSDKLoaded, isConnected, connectors, connect]);
@@ -69,11 +76,17 @@ export default function App() {
   };
 
   const handleMint = async () => {
+    console.log('🎯 Mint button clicked!');
+    console.log('🔗 Connected:', isConnected);
+    console.log('📍 Address:', address);
+    
     if (!isConnected) {
+      console.log('❌ Not connected, showing alert');
       alert('Please connect your wallet first!');
       return;
     }
 
+    console.log('✅ Starting mint process...');
     setIsMinting(true);
     setShowSuccess(false);
     
