@@ -69,6 +69,15 @@ export default function App() {
     }
   }, [isSDKLoaded, isConnected, connectors, connect]);
 
+  // Debug logging for component state
+  useEffect(() => {
+    console.log('🔍 Component Debug Info:');
+    console.log('- isMinting:', isMinting);
+    console.log('- isConnected:', isConnected);
+    console.log('- address:', address);
+    console.log('- connectors count:', connectors.length);
+  }, [isMinting, isConnected, address, connectors]);
+
   // Use SDK context for user data, fallback to wallet address
   const mockUser = {
     fid: contextUser?.fid || 12345,
@@ -78,7 +87,10 @@ export default function App() {
   };
 
   const handleMint = async () => {
-    console.log('🎯 Mint button clicked!');
+    // Basic test - this should ALWAYS show if button click works
+    console.log('🎯 MINT BUTTON CLICKED - BASIC TEST');
+    alert('MINT BUTTON CLICKED - If you see this, the button works!');
+    
     console.log('🔗 Connected:', isConnected);
     console.log('📍 Address:', address);
     console.log('🔌 Available Connectors:', availableConnectors);
@@ -706,6 +718,25 @@ export default function App() {
             )}
           </div>
         </div>
+
+        {/* Test Button - Simple Click Test */}
+        <button
+          onClick={() => alert('TEST BUTTON WORKS!')}
+          style={{ 
+            backgroundColor: '#10B981', 
+            color: 'white', 
+            fontWeight: '600', 
+            padding: '8px 16px', 
+            borderRadius: '6px', 
+            border: 'none',
+            fontSize: '12px', 
+            cursor: 'pointer',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
+            marginBottom: '8px'
+          }}
+        >
+          TEST BUTTON
+        </button>
 
         {/* Mint Button */}
         <button
