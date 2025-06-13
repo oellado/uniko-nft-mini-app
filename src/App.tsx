@@ -1,150 +1,84 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAccount, useConnect, useConnectors, useChainId } from 'wagmi';
-import { generatePreviewNFT, generateUnikoNFT } from './config';
+import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { generatePreviewNFT, generateUnikoNFT, CONTRACT_ABI, CONTRACT_ADDRESS } from './config';
+import { parseEther } from 'viem';
+import { farcasterFrame } from '@farcaster/frame-wagmi-connector';
+import { sdk } from '@farcaster/frame-sdk';
 
 export default function App() {
+  // State variables
   const [showCollection, setShowCollection] = useState(false);
   const [displayNFT, setDisplayNFT] = useState(() => generatePreviewNFT());
-  const [isMinting, setIsMinting] = useState(false);
   const [mintedNFTs, setMintedNFTs] = useState<any[]>([]);
   const [selectedNFT, setSelectedNFT] = useState<any | null>(null);
-  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [contextUser, setContextUser] = useState<any>(null);
+  const [hash, setHash] = useState<`0x${string}`>();
+  
   const itemsPerPage = 16;
   const mintButtonRef = useRef<HTMLButtonElement>(null);
 
   // Wagmi hooks
-  const { address, isConnected } = useAccount();
-  const { connect, connectors } = useConnect();
-  const chainId = useChainId();
-  const availableConnectors = useConnectors();
+  const { isConnected, address } = useAccount();
+  const { connect } = useConnect();
+  const { writeContractAsync, isPending: isWriting } = useWriteContract();
+  
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
 
+  const isPending = isWriting || isConfirming;
+  const successHandled = useRef(false);
+
+  // Initialize Farcaster SDK
   useEffect(() => {
-    const initializeSDK = async () => {
+    const initSDK = async () => {
       try {
-        const isFrame = window.parent !== window;
-        
-        if (isFrame) {
-          const { sdk } = await import('@farcaster/frame-sdk');
-          await sdk.actions.ready();
-          console.log('Frame SDK initialized successfully');
-          
-          // Get user context
-          try {
-            const context = await sdk.context;
-            setContextUser(context.user);
-          } catch (error) {
-            console.log('Could not get user context:', error);
-          }
-        }
-        
-        setIsSDKLoaded(true);
+        await sdk.actions.ready();
       } catch (error) {
-        console.error('Frame SDK initialization error:', error);
-        setIsSDKLoaded(true);
+        console.error('Failed to initialize SDK:', error);
       }
     };
-
-    setTimeout(initializeSDK, 100);
+    initSDK();
   }, []);
 
-  // Auto-connect to Farcaster wallet if available
+  // Handle successful transaction
   useEffect(() => {
-    console.log('🔄 Connection check:', { isSDKLoaded, isConnected, connectorsCount: connectors.length });
-    
-    if (isSDKLoaded && !isConnected && connectors.length > 0) {
-      console.log('🔍 Available connectors:', connectors.map(c => ({ id: c.id, name: c.name })));
-      const farcasterConnector = connectors.find(c => c.id === 'farcasterFrame');
+    if (isSuccess && !successHandled.current) {
+      successHandled.current = true;
       
-      if (farcasterConnector) {
-        console.log('✅ Found Farcaster connector, attempting to connect...');
-        // Small delay to ensure SDK is fully ready
-        setTimeout(() => {
-          connect({ connector: farcasterConnector });
-        }, 100);
-      } else {
-        console.log('❌ No Farcaster connector found');
-      }
-    }
-  }, [isSDKLoaded, isConnected, connectors, connect]);
-
-  // Debug logging for component state
-  useEffect(() => {
-    console.log('🔍 Component Debug Info:');
-    console.log('- isMinting:', isMinting);
-    console.log('- isConnected:', isConnected);
-    console.log('- address:', address);
-    console.log('- connectors count:', connectors.length);
-  }, [isMinting, isConnected, address, connectors]);
-
-  // Native event listeners as fallback for Farcaster iframe issues
-  useEffect(() => {
-    const mintButton = mintButtonRef.current;
-
-    if (mintButton) {
-      const handleNativeMintClick = (e: Event) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('🎯 Native mint click detected!');
-        handleMint();
-      };
-
-      mintButton.addEventListener('click', handleNativeMintClick, { passive: false });
-      mintButton.addEventListener('touchend', handleNativeMintClick, { passive: false });
+      // Generate NFT for display
+      const newNFT = generateUnikoNFT(`seed-${Date.now()}-${Math.random()}`);
+      setMintedNFTs(prev => [...prev, newNFT]);
+      setDisplayNFT(newNFT);
+      setShowSuccess(true);
       
-      return () => {
-        mintButton.removeEventListener('click', handleNativeMintClick);
-        mintButton.removeEventListener('touchend', handleNativeMintClick);
-      };
+      // Hide success message after 3 seconds
+      setTimeout(() => setShowSuccess(false), 3000);
+      
+      setHash(undefined);
+      successHandled.current = false;
     }
-  }, []);
-
-
-
-  // Use SDK context for user data, fallback to wallet address
-  const mockUser = {
-    fid: contextUser?.fid || 12345,
-    username: contextUser?.username || 'testuser',
-    displayName: contextUser?.displayName || (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Test User'),
-    pfpUrl: contextUser?.pfpUrl || 'https://i.imgur.com/placeholder.jpg'
-  };
+  }, [isSuccess]);
 
   const handleMint = async () => {
-    console.log('🎯 Mint button clicked!');
-    console.log('🔗 Connected:', isConnected);
-    console.log('📍 Address:', address);
-    console.log('🔌 Available Connectors:', availableConnectors);
-    console.log('🌐 Chain ID:', chainId);
-    
-    // Force wallet connection if not connected
-    if (!isConnected) {
-      console.log('❌ Not connected, attempting to connect...');
-      try {
-        // Import farcasterFrame connector
-        const { farcasterFrame } = await import('@farcaster/frame-wagmi-connector');
-        await connect({ connector: farcasterFrame() });
-        console.log('✅ Connection attempt made');
-        return; // Exit here, let the user click again after connection
-      } catch (error) {
-        console.error('❌ Connection failed:', error);
-        alert('Please connect your wallet first!');
+    try {
+      setHash(undefined);
+      successHandled.current = false;
+
+      if (!isConnected || !address) {
+        connect({ connector: farcasterFrame() });
         return;
       }
-    }
 
-    console.log('✅ Starting mint process...');
-    setIsMinting(true);
-    setShowSuccess(false);
-    
-    try {
       // Generate NFT metadata
       const newNFT = generateUnikoNFT(`seed-${Date.now()}-${Math.random()}`);
+      
+      // Create metadata JSON string
       const metadata = JSON.stringify({
         name: newNFT.name,
         description: "A cute on-chain companion, 100% on-chain generative Unicode NFT",
-        image: `data:image/svg+xml;base64,${btoa(newNFT.svg)}`,
+        image: `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(newNFT.svg)))}`,
         attributes: [
           { trait_type: "Eyes", value: newNFT.traits.eyes },
           { trait_type: "Mouth", value: newNFT.traits.mouth },
@@ -157,57 +91,26 @@ export default function App() {
         ]
       });
 
-      // Use Farcaster SDK for transaction
-      const { sdk } = await import('@farcaster/frame-sdk');
-      const { contractConfig } = await import('./config');
-      const { encodeFunctionData } = await import('viem');
-
-      console.log('📝 Calling Farcaster transaction with:', {
-        address: contractConfig.address,
+      const txHash = await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
         functionName: 'mint',
-        args: [address!, metadata],
-        value: '1000000000000000'
+        args: [address, metadata],
+        value: parseEther('0.001'), // 0.001 ETH
       });
 
-      // Encode the function data using viem
-      const data = encodeFunctionData({
-        abi: contractConfig.abi,
-        functionName: 'mint',
-        args: [address!, metadata],
-      });
-
-      // Use Farcaster's sendTransaction method which shows the official modal
-      const transactionId = await sdk.actions.sendTransaction({
-        chainId: `eip155:84532`, // Base Sepolia in CAIP-2 format
-        method: 'eth_sendTransaction',
-        params: {
-          to: contractConfig.address,
-          data: data,
-          value: '0x38D7EA4C68000', // 0.001 ETH in hex
-        },
-      });
-
-      console.log('✅ Transaction ID:', transactionId);
-
-      // Add to local state after successful transaction initiation
-      setMintedNFTs(prev => [...prev, newNFT]);
-      setDisplayNFT(newNFT);
-      setIsMinting(false);
-      setShowSuccess(true);
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => setShowSuccess(false), 3000);
-      
+      setHash(txHash);
     } catch (error) {
-      console.error('Minting failed:', error);
-      setIsMinting(false);
-      alert('Minting failed. Please try again.');
+      console.error('Mint failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Mint failed: ${errorMessage}`);
+      setHash(undefined);
+      successHandled.current = false;
     }
   };
 
-  const handleProfileClick = () => {
+  const handleViewCollection = () => {
     setShowCollection(true);
-    setCurrentPage(1);
   };
 
   const handleBackToMint = () => {
@@ -237,29 +140,7 @@ export default function App() {
     setCurrentPage(prev => Math.min(totalPages, prev + 1));
   };
 
-  // Loading screen while SDK initializes
-  if (!isSDKLoaded) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        background: 'linear-gradient(135deg, #BFDBFE 0%, #DDD6FE 100%)',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
-      }}>
-        <div style={{ 
-          fontSize: '48px', 
-          marginBottom: '16px',
-          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
-        }}>
-          • ᴗ •
-        </div>
-        <div style={{ fontSize: '16px', color: '#6B7280' }}>Loading Unikō...</div>
-      </div>
-    );
-  }
+  // Remove loading screen - let the app show even when not connected
 
   if (showCollection) {
     return (
@@ -610,7 +491,7 @@ export default function App() {
         boxSizing: 'border-box'
       }}>
         <button
-          onClick={handleProfileClick}
+          onClick={handleViewCollection}
           style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -621,9 +502,9 @@ export default function App() {
             cursor: 'pointer' 
           }}
         >
-          {mockUser.pfpUrl && mockUser.pfpUrl !== 'https://i.imgur.com/placeholder.jpg' ? (
+          {displayNFT.pfpUrl && displayNFT.pfpUrl !== 'https://i.imgur.com/placeholder.jpg' ? (
             <img 
-              src={mockUser.pfpUrl} 
+              src={displayNFT.pfpUrl} 
               alt="Profile"
               style={{ 
                 width: '28px', 
@@ -650,7 +531,7 @@ export default function App() {
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
               fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
             }}>
-              {mockUser.displayName?.[0] || '?'}
+              {displayNFT.displayName?.[0] || '?'}
             </div>
           )}
         </button>
@@ -750,9 +631,9 @@ export default function App() {
           onMouseDown={handleMint}
           onTouchStart={handleMint}
           onClick={handleMint}
-          disabled={isMinting}
+          disabled={isPending}
           style={{ 
-            backgroundColor: isMinting ? '#60A5FA' : '#2563EB', 
+            backgroundColor: isPending ? '#60A5FA' : '#2563EB', 
             color: 'white', 
             fontWeight: '600', 
             padding: '12px 24px', 
@@ -760,14 +641,14 @@ export default function App() {
             border: 'none',
             fontSize: '16px', 
             boxShadow: '0 6px 16px rgba(0, 0, 0, 0.1)', 
-            cursor: isMinting ? 'not-allowed' : 'pointer',
+            cursor: isPending ? 'not-allowed' : 'pointer',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
             marginBottom: '8px',
             WebkitTapHighlightColor: 'transparent',
             touchAction: 'manipulation'
           }}
         >
-          {isMinting ? "Minting..." : "Mint • 0.001 ETH"}
+          {isPending ? "Minting..." : "Mint • 0.001 ETH"}
         </button>
 
         {/* Success Message */}

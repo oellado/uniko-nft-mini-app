@@ -2,6 +2,32 @@ import type { Abi, Address } from "viem";
 import { baseSepolia } from "viem/chains";
 
 /**
+ * Smart Contract Configuration
+ */
+export const CONTRACT_ADDRESS: Address = "0xC6504dC915Afe34abc9019B64EcC131623AA0aD4";
+
+export const CONTRACT_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "metadata",
+        "type": "string"
+      }
+    ],
+    "name": "mint",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  }
+] as const;
+
+/**
  * UnikoNFT Trait Definitions
  */
 export const traits = {
