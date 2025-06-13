@@ -4,13 +4,24 @@ async function main() {
   console.log("Deploying UnikoNFT contract...");
 
   // Get the deployer account
-  const [deployer] = await ethers.getSigners();
+  const signers = await ethers.getSigners();
+  console.log("Number of signers:", signers.length);
+  
+  if (signers.length === 0) {
+    throw new Error("No signers found. Check your PRIVATE_KEY in .env file");
+  }
+  
+  const [deployer] = signers;
   console.log("Deploying with account:", deployer.address);
   console.log("Account balance:", (await deployer.provider.getBalance(deployer.address)).toString());
 
   // Deploy the contract
   const UnikoNFT = await ethers.getContractFactory("UnikoNFT");
-  const unikoNFT = await UnikoNFT.deploy();
+  const unikoNFT = await UnikoNFT.deploy(
+    "Unikō", // name
+    "UNIKO", // symbol
+    "https://your-domain.com/api/metadata/" // baseURI - will be updated later
+  );
   
   await unikoNFT.waitForDeployment();
   const contractAddress = await unikoNFT.getAddress();

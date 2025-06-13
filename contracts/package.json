@@ -1,0 +1,17 @@
+{
+  "name": "uniko-nft-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for Uniko NFT collection",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network baseSepolia",
+    "verify": "hardhat verify --network baseSepolia"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
+  }
+} 
