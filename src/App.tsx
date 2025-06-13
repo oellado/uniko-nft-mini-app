@@ -76,14 +76,24 @@ export default function App() {
   };
 
   const handleMint = async () => {
+    alert('Mint button clicked! Check console for details.');
     console.log('🎯 Mint button clicked!');
     console.log('🔗 Connected:', isConnected);
     console.log('📍 Address:', address);
+    console.log('🔌 Connector:', connector);
+    console.log('🌐 Chain:', chain);
     
+    // Force wallet connection if not connected
     if (!isConnected) {
-      console.log('❌ Not connected, showing alert');
-      alert('Please connect your wallet first!');
-      return;
+      console.log('❌ Not connected, attempting to connect...');
+      try {
+        await connect({ connector: connectors[0] });
+        console.log('✅ Connection attempt made');
+      } catch (error) {
+        console.error('❌ Connection failed:', error);
+        alert('Please connect your wallet first!');
+        return;
+      }
     }
 
     console.log('✅ Starting mint process...');
@@ -695,12 +705,14 @@ export default function App() {
             fontWeight: '600', 
             padding: '12px 24px', 
             borderRadius: '8px', 
-            border: 'none', 
+            border: '2px solid red', // DEBUG: Red border to see button
             fontSize: '16px', 
             boxShadow: '0 6px 16px rgba(0, 0, 0, 0.1)', 
             cursor: isMinting ? 'not-allowed' : 'pointer',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
-            marginBottom: '8px'
+            marginBottom: '8px',
+            zIndex: 1000, // DEBUG: Ensure button is on top
+            position: 'relative' // DEBUG: Ensure button positioning
           }}
         >
           {isMinting ? "Minting..." : "Mint • 0.001 ETH"}
