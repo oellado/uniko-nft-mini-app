@@ -16,15 +16,17 @@
   },
   "dependencies": {
     "@farcaster/frame-sdk": "^0.0.63",
-    "@farcaster/frame-wagmi-connector": "latest",
-    "@tanstack/react-query": "latest",
+    "@farcaster/frame-wagmi-connector": "^0.0.52",
+    "@tanstack/react-query": "^5.80.7",
+    "@wagmi/connectors": "^5.8.5",
+    "@wagmi/core": "^2.17.3",
     "clsx": "latest",
     "lucide-react": "latest",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "latest",
-    "viem": "latest",
-    "wagmi": "latest"
+    "viem": "^2.31.1",
+    "wagmi": "^2.15.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
