@@ -87,6 +87,11 @@ export default function App() {
   useEffect(() => {
     if (isConnected && address && balance !== undefined && totalSupply !== undefined) {
       fetchUserNFTs();
+      
+      // Also try again after a short delay to ensure we catch everything
+      setTimeout(() => {
+        fetchUserNFTs();
+      }, 2000);
     } else if (!isConnected) {
       setMintedNFTs([]);
       // Reset to preview NFT when disconnected
@@ -97,11 +102,9 @@ export default function App() {
   // Fetch user's NFTs from blockchain
   const fetchUserNFTs = async () => {
     if (!address || !balance || !totalSupply) {
-      console.log('fetchUserNFTs: Missing requirements', { address, balance: balance?.toString(), totalSupply: totalSupply?.toString() });
       return;
     }
     
-    console.log('fetchUserNFTs: Starting fetch for', address, 'with supply', totalSupply?.toString());
     setIsLoadingNFTs(true);
     try {
       const userNFTs = [];
@@ -193,16 +196,13 @@ export default function App() {
       // Sort NFTs by tokenId (newest first)
       userNFTs.sort((a, b) => b.tokenId - a.tokenId);
       
-      console.log('fetchUserNFTs: Found', userNFTs.length, 'NFTs for user');
       setMintedNFTs(userNFTs);
       
-      // Always set the first (newest) NFT as display NFT if user has NFTs
-      if (userNFTs.length > 0) {
-        console.log('fetchUserNFTs: Setting display NFT to', userNFTs[0].name);
+      // Always set the first (newest) NFT as display NFT if user has NFTs and not in collection view
+      if (userNFTs.length > 0 && !showCollection) {
         setDisplayNFT(userNFTs[0]);
-      } else {
+      } else if (userNFTs.length === 0) {
         // If no NFTs, show preview
-        console.log('fetchUserNFTs: No NFTs found, showing preview');
         setDisplayNFT(generatePreviewNFT());
       }
     } catch (error) {
@@ -217,17 +217,26 @@ export default function App() {
     if (isSuccess && !successHandled.current) {
       successHandled.current = true;
       
+      // Generate and show the minted NFT immediately
+      const newNFT = generateUnikoNFT(`seed-${Date.now()}-${Math.random()}`);
+      setDisplayNFT(newNFT);
+      
       setShowSuccess(true);
       
       // Hide success message after 3 seconds
       setTimeout(() => setShowSuccess(false), 3000);
       
-      // Refresh user's NFTs immediately after successful mint (reduced delay)
-      setTimeout(() => {
+      // Refresh user's NFTs multiple times to ensure we catch the new mint
+      const refreshNFTs = () => {
         if (isConnected && address) {
           fetchUserNFTs();
         }
-      }, 1000); // Reduced from 2000 to 1000ms
+      };
+      
+      // Try multiple times with increasing delays
+      setTimeout(refreshNFTs, 500);   // First try after 0.5s
+      setTimeout(refreshNFTs, 2000);  // Second try after 2s
+      setTimeout(refreshNFTs, 5000);  // Third try after 5s
       
       setHash(undefined);
       successHandled.current = false;
@@ -309,8 +318,12 @@ export default function App() {
 
   const handleBackToMint = () => {
     setShowCollection(false);
-    // Always reset to preview NFT when going back to mint page
-    setDisplayNFT(generatePreviewNFT());
+    // If user has NFTs, show their newest one, otherwise show preview
+    if (mintedNFTs.length > 0) {
+      setDisplayNFT(mintedNFTs[0]);
+    } else {
+      setDisplayNFT(generatePreviewNFT());
+    }
   };
 
   const handleNFTClick = (nft: any) => {
