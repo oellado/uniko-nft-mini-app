@@ -19,6 +19,7 @@ export default function App() {
   const [isLoadingNFTs, setIsLoadingNFTs] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [lastMintedTokenId, setLastMintedTokenId] = useState<number | null>(null);
   
   const itemsPerPage = 16;
   const mintButtonRef = useRef<HTMLButtonElement>(null);
@@ -56,6 +57,19 @@ export default function App() {
     initSDK();
   }, []);
 
+  // Handle successful minting - fetch the actual minted NFT
+  useEffect(() => {
+    if (isSuccess && hash && !successHandled.current) {
+      successHandled.current = true;
+      setSuccessToast('NFT minted successfully! 🎉');
+      
+      // Fetch the newly minted NFT after a short delay
+      setTimeout(async () => {
+        await fetchLatestMintedNFT();
+      }, 2000);
+    }
+  }, [isSuccess, hash]);
+
   // Auto-hide success toast after 3 seconds
   useEffect(() => {
     if (successToast) {
@@ -65,6 +79,16 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [successToast]);
+
+  // Auto-hide error toast after 3 seconds
+  useEffect(() => {
+    if (errorToast) {
+      const timer = setTimeout(() => {
+        setErrorToast(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorToast]);
 
   // Read user's NFT balance
   const { data: balance } = useReadContract({
@@ -94,10 +118,122 @@ export default function App() {
       }, 2000);
     } else if (!isConnected) {
       setMintedNFTs([]);
-      // Reset to preview NFT when disconnected
+      // Always show preview NFT when disconnected
       setDisplayNFT(generatePreviewNFT());
+      setLastMintedTokenId(null);
     }
   }, [isConnected, address, balance, totalSupply]);
+
+  // Fetch the latest minted NFT (called after successful mint)
+  const fetchLatestMintedNFT = async () => {
+    if (!address || !totalSupply) return;
+    
+    try {
+      const supply = Number(totalSupply);
+      
+      // Check the latest token to see if user owns it
+      for (let tokenId = supply; tokenId >= 1; tokenId--) {
+        try {
+          const owner = await readContract(config, {
+            address: CONTRACT_ADDRESS,
+            abi: CONTRACT_ABI,
+            functionName: 'ownerOf',
+            args: [BigInt(tokenId)]
+          });
+          
+          if (owner.toLowerCase() === address.toLowerCase()) {
+            // This is the user's latest NFT
+            const nft = await fetchNFTData(tokenId);
+            if (nft) {
+              setDisplayNFT(nft);
+              setLastMintedTokenId(tokenId);
+              
+              // Also refresh the full collection
+              await fetchUserNFTs();
+            }
+            break;
+          }
+        } catch (error) {
+          continue;
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching latest minted NFT:', error);
+    }
+  };
+
+  // Helper function to fetch NFT data for a specific token ID
+  const fetchNFTData = async (tokenId: number) => {
+    try {
+      const metadata = await readContract(config, {
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: 'getTokenMetadata',
+        args: [BigInt(tokenId)]
+      });
+      
+      const isUltraRare = await readContract(config, {
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: 'isUltraRare',
+        args: [BigInt(tokenId)]
+      });
+      
+      // Parse metadata and create NFT object
+      try {
+        const parsedMetadata = JSON.parse(metadata);
+        
+        // Decode base64 SVG with proper UTF-8 handling
+        let svgContent = '';
+        if (parsedMetadata.image && parsedMetadata.image.includes('data:image/svg+xml;base64,')) {
+          const base64Data = parsedMetadata.image.replace('data:image/svg+xml;base64,', '');
+          try {
+            // Proper UTF-8 decoding for Unicode characters
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            svgContent = new TextDecoder('utf-8').decode(bytes);
+          } catch (decodeError) {
+            console.error(`Error decoding SVG for token ${tokenId}:`, decodeError);
+            // Fallback: try simple atob
+            try {
+              svgContent = atob(base64Data);
+            } catch {
+              svgContent = parsedMetadata.image; // final fallback
+            }
+          }
+        } else {
+          svgContent = parsedMetadata.image || '';
+        }
+        
+        const nft = {
+          tokenId,
+          name: parsedMetadata.name,
+          svg: svgContent,
+          isUltraRare,
+          traits: {} as Record<string, any>
+        };
+        
+        // Extract traits from attributes
+        if (parsedMetadata.attributes) {
+          parsedMetadata.attributes.forEach((attr: any) => {
+            const traitKey = attr.trait_type.toLowerCase().replace(/\s+/g, '');
+            nft.traits[traitKey] = attr.value;
+          });
+        }
+        
+        return nft;
+      } catch (parseError) {
+        console.error(`Error parsing metadata for token ${tokenId}:`, parseError);
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error fetching NFT data for token ${tokenId}:`, error);
+      return null;
+    }
+  };
 
   // Fetch user's NFTs from blockchain
   const fetchUserNFTs = async () => {
@@ -122,69 +258,9 @@ export default function App() {
           });
           
           if (owner.toLowerCase() === address.toLowerCase()) {
-            // Get metadata for this token
-            const metadata = await readContract(config, {
-              address: CONTRACT_ADDRESS,
-              abi: CONTRACT_ABI,
-              functionName: 'getTokenMetadata',
-              args: [BigInt(tokenId)]
-            });
-            
-            const isUltraRare = await readContract(config, {
-              address: CONTRACT_ADDRESS,
-              abi: CONTRACT_ABI,
-              functionName: 'isUltraRare',
-              args: [BigInt(tokenId)]
-            });
-            
-            // Parse metadata and create NFT object
-            try {
-              const parsedMetadata = JSON.parse(metadata);
-              
-              // Decode base64 SVG with proper UTF-8 handling
-              let svgContent = '';
-              if (parsedMetadata.image && parsedMetadata.image.includes('data:image/svg+xml;base64,')) {
-                const base64Data = parsedMetadata.image.replace('data:image/svg+xml;base64,', '');
-                try {
-                  // Proper UTF-8 decoding for Unicode characters
-                  const binaryString = atob(base64Data);
-                  const bytes = new Uint8Array(binaryString.length);
-                  for (let i = 0; i < binaryString.length; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
-                  }
-                  svgContent = new TextDecoder('utf-8').decode(bytes);
-                } catch (decodeError) {
-                  console.error(`Error decoding SVG for token ${tokenId}:`, decodeError);
-                  // Fallback: try simple atob
-                  try {
-                    svgContent = atob(base64Data);
-                  } catch {
-                    svgContent = parsedMetadata.image; // final fallback
-                  }
-                }
-              } else {
-                svgContent = parsedMetadata.image || '';
-              }
-              
-              const nft = {
-                tokenId,
-                name: parsedMetadata.name,
-                svg: svgContent,
-                isUltraRare,
-                traits: {} as Record<string, any>
-              };
-              
-              // Extract traits from attributes
-              if (parsedMetadata.attributes) {
-                parsedMetadata.attributes.forEach((attr: any) => {
-                  const traitKey = attr.trait_type.toLowerCase().replace(/\s+/g, '');
-                  nft.traits[traitKey] = attr.value;
-                });
-              }
-              
+            const nft = await fetchNFTData(tokenId);
+            if (nft) {
               userNFTs.push(nft);
-            } catch (parseError) {
-              console.error(`Error parsing metadata for token ${tokenId}:`, parseError);
             }
           }
         } catch (error) {
@@ -198,60 +274,18 @@ export default function App() {
       
       setMintedNFTs(userNFTs);
       
-      // Always set the first (newest) NFT as display NFT if user has NFTs and not in collection view
-      if (userNFTs.length > 0 && !showCollection) {
+      // If user has NFTs and we're not showing collection, show their newest one
+      if (userNFTs.length > 0 && !showCollection && !lastMintedTokenId) {
         setDisplayNFT(userNFTs[0]);
-      } else if (userNFTs.length === 0) {
-        // If no NFTs, show preview
-        setDisplayNFT(generatePreviewNFT());
       }
+      
     } catch (error) {
       console.error('Error fetching user NFTs:', error);
+      setErrorToast('Failed to load your NFTs');
     } finally {
       setIsLoadingNFTs(false);
     }
   };
-
-  // Handle successful transaction
-  useEffect(() => {
-    if (isSuccess && !successHandled.current) {
-      successHandled.current = true;
-      
-      // Generate and show the minted NFT immediately
-      const newNFT = generateUnikoNFT(`seed-${Date.now()}-${Math.random()}`);
-      setDisplayNFT(newNFT);
-      
-      setShowSuccess(true);
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => setShowSuccess(false), 3000);
-      
-      // Refresh user's NFTs multiple times to ensure we catch the new mint
-      const refreshNFTs = () => {
-        if (isConnected && address) {
-          fetchUserNFTs();
-        }
-      };
-      
-      // Try multiple times with increasing delays
-      setTimeout(refreshNFTs, 500);   // First try after 0.5s
-      setTimeout(refreshNFTs, 2000);  // Second try after 2s
-      setTimeout(refreshNFTs, 5000);  // Third try after 5s
-      
-      setHash(undefined);
-      successHandled.current = false;
-    }
-  }, [isSuccess, isConnected, address]);
-
-  // Auto-hide error toast after 3 seconds
-  useEffect(() => {
-    if (errorToast) {
-      const timer = setTimeout(() => {
-        setErrorToast(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [errorToast]);
 
   const handleMint = async () => {
     try {
@@ -263,10 +297,12 @@ export default function App() {
         return;
       }
 
-      // Generate NFT metadata
-      const newNFT = generateUnikoNFT(`seed-${Date.now()}-${Math.random()}`);
+      // Generate NFT with deterministic randomness based on user address and current time
+      // This ensures the NFT is generated consistently but uniquely per mint
+      const seed = `${address}-${Date.now()}-${Math.random()}`;
+      const newNFT = generateUnikoNFT(seed);
       
-      // Create metadata JSON string
+      // Create complete metadata JSON string
       const metadata = JSON.stringify({
         name: newNFT.name,
         description: "A cute on-chain companion, 100% on-chain generative Unicode NFT",
@@ -318,8 +354,17 @@ export default function App() {
 
   const handleBackToMint = () => {
     setShowCollection(false);
-    // If user has NFTs, show their newest one, otherwise show preview
-    if (mintedNFTs.length > 0) {
+    // Show the latest minted NFT if available, otherwise show preview
+    if (lastMintedTokenId && mintedNFTs.length > 0) {
+      const latestNFT = mintedNFTs.find(nft => nft.tokenId === lastMintedTokenId);
+      if (latestNFT) {
+        setDisplayNFT(latestNFT);
+      } else if (mintedNFTs.length > 0) {
+        setDisplayNFT(mintedNFTs[0]);
+      } else {
+        setDisplayNFT(generatePreviewNFT());
+      }
+    } else if (mintedNFTs.length > 0) {
       setDisplayNFT(mintedNFTs[0]);
     } else {
       setDisplayNFT(generatePreviewNFT());
@@ -332,6 +377,14 @@ export default function App() {
 
   const handleCloseModal = () => {
     setSelectedNFT(null);
+  };
+
+  // Reset to preview when user disconnects
+  const handleNewPreview = () => {
+    if (!isConnected) {
+      setDisplayNFT(generatePreviewNFT());
+      setLastMintedTokenId(null);
+    }
   };
 
   // Pagination logic
@@ -868,6 +921,30 @@ export default function App() {
               </div>
             )}
           </div>
+          
+          {/* New Preview Button - only show when not connected and showing preview */}
+          {!isConnected && displayNFT.type === 'Preview' && (
+            <div style={{ textAlign: 'center', marginTop: '8px' }}>
+              <button
+                onClick={handleNewPreview}
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  color: '#374151',
+                  fontWeight: '500',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #D1D5DB',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation'
+                }}
+              >
+                New Preview
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Mint Button */}
