@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
+import { readContract } from 'wagmi/actions';
 import { generatePreviewNFT, generateUnikoNFT, CONTRACT_ABI, CONTRACT_ADDRESS } from './config';
+import { config } from './wagmi';
 import { parseEther } from 'viem';
 import { farcasterFrame } from '@farcaster/frame-wagmi-connector';
 import { sdk } from '@farcaster/frame-sdk';
@@ -14,6 +16,7 @@ export default function App() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hash, setHash] = useState<`0x${string}`>();
+  const [isLoadingNFTs, setIsLoadingNFTs] = useState(false);
   
   const itemsPerPage = 16;
   const mintButtonRef = useRef<HTMLButtonElement>(null);
@@ -30,17 +33,141 @@ export default function App() {
   const isPending = isWriting || isConfirming;
   const successHandled = useRef(false);
 
-  // Initialize Farcaster SDK
+  // Initialize Farcaster SDK and show add frame prompt
   useEffect(() => {
     const initSDK = async () => {
       try {
         await sdk.actions.ready();
+        
+        // Show add frame prompt for new users
+        const context = await sdk.context;
+        if (context?.user && !localStorage.getItem('uniko-frame-prompted')) {
+          setTimeout(() => {
+            sdk.actions.addFrame();
+            localStorage.setItem('uniko-frame-prompted', 'true');
+          }, 2000);
+        }
       } catch (error) {
         console.error('Failed to initialize SDK:', error);
       }
     };
     initSDK();
   }, []);
+
+  // Fetch user's NFTs when wallet connects
+  useEffect(() => {
+    if (isConnected && address) {
+      fetchUserNFTs();
+    } else {
+      setMintedNFTs([]);
+    }
+  }, [isConnected, address]);
+
+  // Read user's NFT balance
+  const { data: balance } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: { enabled: !!address }
+  });
+
+  // Read total supply to know which tokens exist
+  const { data: totalSupply } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'totalSupply',
+    query: { enabled: true }
+  });
+
+  // Fetch user's NFTs from blockchain
+  const fetchUserNFTs = async () => {
+    if (!address || !balance || !totalSupply) return;
+    
+    setIsLoadingNFTs(true);
+    try {
+      const userNFTs = [];
+      const supply = Number(totalSupply);
+      
+      // Check each token to see if user owns it
+      for (let tokenId = 1; tokenId <= supply; tokenId++) {
+        try {
+          // Check if user owns this token
+          const owner = await readContract(config, {
+            address: CONTRACT_ADDRESS,
+            abi: CONTRACT_ABI,
+            functionName: 'ownerOf',
+            args: [BigInt(tokenId)]
+          });
+          
+          if (owner.toLowerCase() === address.toLowerCase()) {
+            // Get metadata for this token
+            const metadata = await readContract(config, {
+              address: CONTRACT_ADDRESS,
+              abi: CONTRACT_ABI,
+              functionName: 'getTokenMetadata',
+              args: [BigInt(tokenId)]
+            });
+            
+            const isUltraRare = await readContract(config, {
+              address: CONTRACT_ADDRESS,
+              abi: CONTRACT_ABI,
+              functionName: 'isUltraRare',
+              args: [BigInt(tokenId)]
+            });
+            
+                          // Parse metadata and create NFT object
+              try {
+                const parsedMetadata = JSON.parse(metadata);
+                
+                // Decode base64 SVG
+                let svgContent = '';
+                if (parsedMetadata.image && parsedMetadata.image.includes('data:image/svg+xml;base64,')) {
+                  const base64Data = parsedMetadata.image.replace('data:image/svg+xml;base64,', '');
+                  try {
+                    svgContent = atob(base64Data);
+                  } catch (decodeError) {
+                    console.error(`Error decoding SVG for token ${tokenId}:`, decodeError);
+                    svgContent = parsedMetadata.image; // fallback to original
+                  }
+                } else {
+                  svgContent = parsedMetadata.image || '';
+                }
+                
+                const nft = {
+                  tokenId,
+                  name: parsedMetadata.name,
+                  svg: svgContent,
+                  isUltraRare,
+                  traits: {} as Record<string, any>
+                };
+                
+                // Extract traits from attributes
+                if (parsedMetadata.attributes) {
+                  parsedMetadata.attributes.forEach((attr: any) => {
+                    const traitKey = attr.trait_type.toLowerCase().replace(/\s+/g, '');
+                    nft.traits[traitKey] = attr.value;
+                  });
+                }
+                
+                userNFTs.push(nft);
+              } catch (parseError) {
+                console.error(`Error parsing metadata for token ${tokenId}:`, parseError);
+              }
+          }
+        } catch (error) {
+          // Token might not exist or other error, continue
+          continue;
+        }
+      }
+      
+      setMintedNFTs(userNFTs);
+    } catch (error) {
+      console.error('Error fetching user NFTs:', error);
+    } finally {
+      setIsLoadingNFTs(false);
+    }
+  };
 
   // Handle successful transaction
   useEffect(() => {
@@ -55,6 +182,9 @@ export default function App() {
       
       // Hide success message after 3 seconds
       setTimeout(() => setShowSuccess(false), 3000);
+      
+      // Refresh user's NFTs after successful mint
+      setTimeout(() => fetchUserNFTs(), 5000);
       
       setHash(undefined);
       successHandled.current = false;
@@ -138,6 +268,25 @@ export default function App() {
 
   const handleNextPage = () => {
     setCurrentPage(prev => Math.min(totalPages, prev + 1));
+  };
+
+  const handleShare = async () => {
+    try {
+      if (sdk && sdk.actions && sdk.actions.openUrl) {
+        const shareText = "Mint your Unikō onchain companions!";
+        const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(window.location.href)}`;
+        await sdk.actions.openUrl(shareUrl);
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+      // Fallback: copy to clipboard
+      const shareText = "Mint your Unikō onchain companions! " + window.location.href;
+      navigator.clipboard.writeText(shareText).then(() => {
+        alert('Link copied to clipboard!');
+      }).catch(() => {
+        alert('Unable to share. Please copy the link manually.');
+      });
+    }
   };
 
   // Remove loading screen - let the app show even when not connected
@@ -268,7 +417,24 @@ export default function App() {
           padding: '16px',
           boxSizing: 'border-box'
         }}>
-          {mintedNFTs.length === 0 ? (
+          {isLoadingNFTs ? (
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <h2 style={{ 
+                fontSize: '20px', 
+                fontWeight: '600', 
+                color: '#1F2937', 
+                marginBottom: '6px', 
+                margin: '0 0 6px 0',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+              }}>Loading Collection...</h2>
+              <p style={{ 
+                color: '#4B5563', 
+                fontSize: '14px', 
+                margin: '0',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+              }}>Fetching your Unikō NFTs from the blockchain...</p>
+            </div>
+          ) : mintedNFTs.length === 0 ? (
             <>
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <h2 style={{ 
@@ -649,6 +815,32 @@ export default function App() {
           }}
         >
           {isPending ? "Minting..." : "Mint • 0.001 ETH"}
+        </button>
+
+        {/* Share Button */}
+        <button
+          onClick={handleShare}
+          style={{ 
+            backgroundColor: '#60A5FA', 
+            color: 'white', 
+            fontWeight: '600', 
+            padding: '12px 24px', 
+            borderRadius: '8px', 
+            border: 'none',
+            fontSize: '16px', 
+            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.1)', 
+            cursor: 'pointer',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
+            marginBottom: '8px',
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            justifyContent: 'center'
+          }}
+        >
+          Share
         </button>
 
         {/* Success Message */}
