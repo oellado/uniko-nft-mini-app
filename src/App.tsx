@@ -1000,7 +1000,7 @@ export default function App() {
         </button>
 
         {/* Success Message */}
-        {showSuccess && (
+        {isSuccess && (
           <div style={{
             color: '#059669',
             fontSize: '14px',
