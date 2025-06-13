@@ -19,7 +19,7 @@ export default function App() {
   const [isLoadingNFTs, setIsLoadingNFTs] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
-  const [lastMintedTokenId, setLastMintedTokenId] = useState<number | null>(null);
+
   
   // Farcaster user context
   const [userPfp, setUserPfp] = useState<string | null>(null);
@@ -106,7 +106,6 @@ export default function App() {
   useEffect(() => {
     // On app load, always show preview NFT
     setDisplayNFT(generatePreviewNFT());
-    setLastMintedTokenId(null);
   }, []);
 
   // Read user's NFT balance
@@ -139,7 +138,6 @@ export default function App() {
       setMintedNFTs([]);
       // Always show preview NFT when disconnected
       setDisplayNFT(generatePreviewNFT());
-      setLastMintedTokenId(null);
     }
   }, [isConnected, address, balance, totalSupply]);
 
@@ -165,7 +163,6 @@ export default function App() {
             const nft = await fetchNFTData(tokenId);
             if (nft) {
               setDisplayNFT(nft);
-              setLastMintedTokenId(tokenId);
               
               // Also refresh the full collection
               await fetchUserNFTs();
@@ -399,7 +396,6 @@ export default function App() {
     
     // CRITICAL FIX: ALWAYS show generic preview when returning to main screen
     setDisplayNFT(generatePreviewNFT());
-    setLastMintedTokenId(null); // Clear the last minted token to prevent confusion
   };
 
   const handleNFTClick = (nft: any) => {
@@ -414,7 +410,6 @@ export default function App() {
   const handleNewPreview = () => {
     if (!isConnected) {
       setDisplayNFT(generatePreviewNFT());
-      setLastMintedTokenId(null);
     }
   };
 

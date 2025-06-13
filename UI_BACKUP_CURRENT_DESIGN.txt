@@ -1,0 +1,320 @@
+# UNIKŌ NFT MINI APP - UI/INTERFACE BACKUP
+# Current Design Documentation - Save this file!
+# Date: December 2024
+
+## MAIN DESIGN PRINCIPLES
+- Font Family: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+- Background: 'linear-gradient(135deg, #BFDBFE 0%, #DDD6FE 100%)' (Blue to Purple gradient)
+- Fixed positioning for full-screen mobile experience
+- Glassmorphism effects with backdrop-filter: blur(8px)
+- Rounded corners and soft shadows throughout
+
+## COLOR PALETTE
+- Primary Gradient: linear-gradient(45deg, #9333ea, #ec4899, #3b82f6, #10b981, #f59e0b)
+- Background: Blue (#BFDBFE) to Purple (#DDD6FE) gradient
+- Text Primary: #374151 (dark gray)
+- Text Secondary: #4B5563, #6B7280, #9CA3AF (gray variations)
+- Success: #059669 (green)
+- Error: #DC2626 (red)
+- White overlays: rgba(255, 255, 255, 0.2) with blur
+
+## MAIN SCREEN LAYOUT
+
+### Container
+```css
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+width: 100%; height: 100%;
+background: linear-gradient(135deg, #BFDBFE 0%, #DDD6FE 100%);
+overflow: hidden;
+fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif';
+```
+
+### Top Bar
+```css
+width: 100%;
+backgroundColor: rgba(255, 255, 255, 0.2);
+backdropFilter: blur(8px);
+borderBottom: 1px solid rgba(255, 255, 255, 0.3);
+padding: 8px 12px;
+display: flex;
+alignItems: center;
+justifyContent: flex-end;
+height: 48px;
+boxSizing: border-box;
+```
+
+### Profile Picture (PFP)
+```css
+width: 28px; height: 28px;
+borderRadius: 50%;
+border: 2px solid white;
+boxShadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+objectFit: cover;
+```
+
+### Fallback PFP
+```css
+width: 28px; height: 28px;
+borderRadius: 50%;
+background: linear-gradient(135deg, #60A5FA 0%, #A855F7 100%);
+display: flex; alignItems: center; justifyContent: center;
+color: white; fontSize: 11px; fontWeight: bold;
+border: 2px solid white;
+boxShadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+```
+
+### Main Title "Unikō"
+```css
+fontSize: 32px;
+fontWeight: 800;
+marginBottom: 8px;
+background: linear-gradient(45deg, #9333ea, #ec4899, #3b82f6, #10b981, #f59e0b, #9333ea);
+backgroundSize: 300% 100%;
+WebkitBackgroundClip: text;
+WebkitTextFillColor: transparent;
+backgroundClip: text;
+animation: gradientShift 3s ease-in-out infinite;
+```
+
+### Subtitle Text
+```css
+color: #374151;
+fontSize: 13px;
+lineHeight: 1.4;
+fontWeight: 600;
+```
+
+### NFT Card Container
+```css
+width: 220px; height: 220px;
+backgroundColor: white;
+borderRadius: 12px;
+boxShadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+border: 1px solid #E5E7EB;
+overflow: hidden;
+position: relative;
+```
+
+### Ultra Rare Badge
+```css
+position: absolute; top: 8px; left: 8px;
+background: linear-gradient(45deg, #9333ea, #ec4899);
+color: white;
+padding: 4px 8px;
+borderRadius: 6px;
+fontSize: 10px;
+fontWeight: 700;
+```
+
+### Mint Button
+```css
+backgroundColor: #2563EB (normal) / #60A5FA (pending);
+color: white;
+fontWeight: 600;
+padding: 12px 24px;
+borderRadius: 8px;
+border: none;
+fontSize: 16px;
+boxShadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+cursor: pointer;
+marginBottom: 8px;
+WebkitTapHighlightColor: transparent;
+touchAction: manipulation;
+```
+
+### Share Button
+```css
+backgroundColor: #60A5FA;
+color: white;
+fontWeight: 600;
+padding: 12px 24px;
+borderRadius: 8px;
+border: none;
+fontSize: 16px;
+boxShadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+display: flex; alignItems: center; gap: 6px; justifyContent: center;
+```
+
+### New Preview Button
+```css
+backgroundColor: rgba(255, 255, 255, 0.8);
+color: #374151;
+fontWeight: 500;
+padding: 6px 12px;
+borderRadius: 6px;
+border: 1px solid #D1D5DB;
+fontSize: 12px;
+cursor: pointer;
+```
+
+## COLLECTION SCREEN LAYOUT
+
+### Collection Top Bar
+Same as main screen top bar but with:
+- Back button (left): SVG arrow + "Back" text
+- Title: "My Unikō Collection" with gradient text
+- PFP (right): Same styling as main screen
+
+### Collection Grid
+```css
+display: grid;
+gridTemplateColumns: repeat(4, 1fr);
+gap: 8px;
+width: 240px; height: 240px;
+```
+
+### Grid Items (NFT Thumbnails)
+```css
+width: 56px; height: 56px;
+backgroundColor: white (with NFT) / rgba(255, 255, 255, 0.5) (empty);
+borderRadius: 6px;
+border: 1px solid #D1D5DB;
+display: flex; alignItems: center; justifyContent: center;
+overflow: hidden;
+position: relative;
+cursor: pointer (with NFT) / default (empty);
+transition: transform 0.1s ease;
+```
+
+### Empty Grid Placeholder
+```css
+color: #9CA3AF;
+fontSize: 12px;
+content: "• ᴗ •";
+```
+
+### NFT Modal (Enlarged View)
+```css
+position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+backdropFilter: blur(8px);
+backgroundColor: rgba(0, 0, 0, 0.3);
+zIndex: 1000;
+display: flex; alignItems: center; justifyContent: center;
+```
+
+### Modal Content
+```css
+width: 260px; height: 260px;
+backgroundColor: white;
+borderRadius: 16px;
+boxShadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+border: 2px solid #E5E7EB;
+overflow: hidden;
+position: relative;
+maxWidth: 80vw; maxHeight: 80vh;
+```
+
+### Pagination Controls
+```css
+display: flex; alignItems: center; gap: 12px;
+```
+
+### Pagination Buttons
+```css
+padding: 8px 12px;
+borderRadius: 6px;
+border: 1px solid #D1D5DB;
+backgroundColor: white (enabled) / rgba(255, 255, 255, 0.5) (disabled);
+color: #374151 (enabled) / #9CA3AF (disabled);
+cursor: pointer (enabled) / not-allowed (disabled);
+fontSize: 14px; fontWeight: 500;
+```
+
+## TOAST NOTIFICATIONS
+
+### Success Toast
+```css
+position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+backgroundColor: #F3F4F6;
+border: 1px solid #E5E7EB;
+color: #1F2937;
+padding: 12px 16px;
+borderRadius: 8px;
+fontSize: 14px; fontWeight: 500;
+boxShadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+zIndex: 1000;
+maxWidth: 300px; textAlign: center;
+animation: slideInFromTop 0.3s ease-out;
+```
+
+### Error Toast
+```css
+backgroundColor: #FEF2F2;
+border: 1px solid #FECACA;
+color: #DC2626;
+(other properties same as success toast)
+```
+
+## ANIMATIONS
+
+### Gradient Shift (Title)
+```css
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+```
+
+### Slide In From Top (Toasts)
+```css
+@keyframes slideInFromTop {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+```
+
+### Button Press Effect
+```css
+onMouseDown: transform: scale(0.95);
+onMouseUp: transform: scale(1);
+onMouseLeave: transform: scale(1);
+```
+
+## RESPONSIVE CONSIDERATIONS
+- Fixed viewport sizing for mobile-first design
+- Touch-friendly button sizes (minimum 44px touch targets)
+- WebkitTapHighlightColor: transparent for iOS
+- touchAction: manipulation for better touch response
+- Proper overflow handling for mobile screens
+
+## TYPOGRAPHY HIERARCHY
+- Main Title: 32px, weight 800, gradient text
+- Section Headers: 20px, weight 600
+- Collection Title: 16px, weight 700, gradient text
+- Body Text: 14px, weight 500
+- Small Text: 13px, weight 600
+- Button Text: 16px, weight 600
+- Tiny Text: 12px, weight 500
+- PFP Fallback: 11px, weight bold
+
+## SPACING SYSTEM
+- Container padding: 12px 16px
+- Button padding: 12px 24px (large), 8px 12px (medium), 6px 12px (small)
+- Margins: 8px, 12px, 16px, 20px, 24px
+- Gaps: 6px, 8px, 12px
+- Border radius: 6px (small), 8px (medium), 12px (large), 16px (modal), 50% (circular)
+
+## SHADOW SYSTEM
+- Light: 0 2px 4px rgba(0, 0, 0, 0.1)
+- Medium: 0 4px 12px rgba(0, 0, 0, 0.1)
+- Heavy: 0 8px 20px rgba(0, 0, 0, 0.1)
+- Modal: 0 20px 60px rgba(0, 0, 0, 0.3)
+- Button: 0 6px 16px rgba(0, 0, 0, 0.1)
+
+## CRITICAL BEHAVIOR NOTES
+1. App ALWAYS starts with generic preview NFT (•ᴗ•)
+2. After minting, shows the ACTUAL minted NFT from blockchain
+3. Returning to main screen ALWAYS shows preview, never old NFTs
+4. Collection fetches NFTs in parallel using Promise.all for performance
+5. PFP loads from Farcaster context with error fallback
+6. All interactions have proper loading states and error handling
+
+## FARCASTER INTEGRATION
+- Profile pictures from context.user.pfpUrl
+- Share functionality opens Warpcast composer
+- Frame SDK integration for add frame prompt
+- Proper error handling for SDK failures
+
+This design maintains the cute, friendly aesthetic while being professional and performant. The glassmorphism effects and gradient animations give it a modern, premium feel perfect for the Farcaster ecosystem. 
