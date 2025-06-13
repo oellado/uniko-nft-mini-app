@@ -17,6 +17,8 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hash, setHash] = useState<`0x${string}`>();
   const [isLoadingNFTs, setIsLoadingNFTs] = useState(false);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
   
   const itemsPerPage = 16;
   const mintButtonRef = useRef<HTMLButtonElement>(null);
@@ -120,15 +122,26 @@ export default function App() {
               try {
                 const parsedMetadata = JSON.parse(metadata);
                 
-                // Decode base64 SVG
+                // Decode base64 SVG with proper UTF-8 handling
                 let svgContent = '';
                 if (parsedMetadata.image && parsedMetadata.image.includes('data:image/svg+xml;base64,')) {
                   const base64Data = parsedMetadata.image.replace('data:image/svg+xml;base64,', '');
                   try {
-                    svgContent = atob(base64Data);
+                    // Proper UTF-8 decoding for Unicode characters
+                    const binaryString = atob(base64Data);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                      bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    svgContent = new TextDecoder('utf-8').decode(bytes);
                   } catch (decodeError) {
                     console.error(`Error decoding SVG for token ${tokenId}:`, decodeError);
-                    svgContent = parsedMetadata.image; // fallback to original
+                    // Fallback: try simple atob
+                    try {
+                      svgContent = atob(base64Data);
+                    } catch {
+                      svgContent = parsedMetadata.image; // final fallback
+                    }
                   }
                 } else {
                   svgContent = parsedMetadata.image || '';
@@ -191,6 +204,26 @@ export default function App() {
     }
   }, [isSuccess]);
 
+  // Auto-hide error toast after 3 seconds
+  useEffect(() => {
+    if (errorToast) {
+      const timer = setTimeout(() => {
+        setErrorToast(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorToast]);
+
+  // Auto-hide success toast after 3 seconds
+  useEffect(() => {
+    if (successToast) {
+      const timer = setTimeout(() => {
+        setSuccessToast(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successToast]);
+
   const handleMint = async () => {
     try {
       setHash(undefined);
@@ -233,7 +266,14 @@ export default function App() {
     } catch (error) {
       console.error('Mint failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(`Mint failed: ${errorMessage}`);
+      
+      // Show small toast for user cancellation
+      if (errorMessage.includes('User rejected') || errorMessage.includes('user rejected') || errorMessage.includes('cancelled') || errorMessage.includes('canceled')) {
+        setErrorToast('Transaction cancelled');
+      } else {
+        setErrorToast(`Mint failed: ${errorMessage}`);
+      }
+      
       setHash(undefined);
       successHandled.current = false;
     }
@@ -241,6 +281,10 @@ export default function App() {
 
   const handleViewCollection = () => {
     setShowCollection(true);
+    // Immediately fetch NFTs when viewing collection
+    if (isConnected && address) {
+      fetchUserNFTs();
+    }
   };
 
   const handleBackToMint = () => {
@@ -282,9 +326,9 @@ export default function App() {
       // Fallback: copy to clipboard
       const shareText = "Mint your Unikō onchain companions! " + window.location.href;
       navigator.clipboard.writeText(shareText).then(() => {
-        alert('Link copied to clipboard!');
+        setSuccessToast('Link copied to clipboard!');
       }).catch(() => {
-        alert('Unable to share. Please copy the link manually.');
+        setErrorToast('Unable to share. Please copy the link manually.');
       });
     }
   };
@@ -873,6 +917,56 @@ export default function App() {
         )}
       </div>
 
+      {/* Error Toast */}
+      {errorToast && (
+        <div style={{
+          position: 'fixed',
+          top: '16px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#FEF2F2',
+          border: '1px solid #FECACA',
+          color: '#DC2626',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '500',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          zIndex: 1000,
+          maxWidth: '300px',
+          textAlign: 'center',
+          animation: 'slideInFromTop 0.3s ease-out'
+        }}>
+          {errorToast}
+        </div>
+      )}
+
+      {/* Success Toast */}
+      {successToast && (
+        <div style={{
+          position: 'fixed',
+          top: '16px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#F3F4F6',
+          border: '1px solid #E5E7EB',
+          color: '#1F2937',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '500',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          zIndex: 1000,
+          maxWidth: '300px',
+          textAlign: 'center',
+          animation: 'slideInFromTop 0.3s ease-out'
+        }}>
+          {successToast}
+        </div>
+      )}
+
       {/* CSS Animations */}
       <style>{`
         @keyframes gradientShift {
@@ -886,6 +980,11 @@ export default function App() {
           20% { opacity: 1; transform: translateY(0); }
           80% { opacity: 1; transform: translateY(0); }
           100% { opacity: 0; transform: translateY(-10px); }
+        }
+        
+        @keyframes slideInFromTop {
+          0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
       `}</style>
     </div>
