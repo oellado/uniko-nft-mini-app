@@ -96,8 +96,12 @@ export default function App() {
 
   // Fetch user's NFTs from blockchain
   const fetchUserNFTs = async () => {
-    if (!address || !balance || !totalSupply) return;
+    if (!address || !balance || !totalSupply) {
+      console.log('fetchUserNFTs: Missing requirements', { address, balance: balance?.toString(), totalSupply: totalSupply?.toString() });
+      return;
+    }
     
+    console.log('fetchUserNFTs: Starting fetch for', address, 'with supply', totalSupply?.toString());
     setIsLoadingNFTs(true);
     try {
       const userNFTs = [];
@@ -189,11 +193,17 @@ export default function App() {
       // Sort NFTs by tokenId (newest first)
       userNFTs.sort((a, b) => b.tokenId - a.tokenId);
       
+      console.log('fetchUserNFTs: Found', userNFTs.length, 'NFTs for user');
       setMintedNFTs(userNFTs);
       
-      // Set the first (newest) NFT as display NFT if user has NFTs and no current display NFT with tokenId
-      if (userNFTs.length > 0 && (!displayNFT.tokenId || displayNFT.tokenId === undefined)) {
+      // Always set the first (newest) NFT as display NFT if user has NFTs
+      if (userNFTs.length > 0) {
+        console.log('fetchUserNFTs: Setting display NFT to', userNFTs[0].name);
         setDisplayNFT(userNFTs[0]);
+      } else {
+        // If no NFTs, show preview
+        console.log('fetchUserNFTs: No NFTs found, showing preview');
+        setDisplayNFT(generatePreviewNFT());
       }
     } catch (error) {
       console.error('Error fetching user NFTs:', error);
@@ -212,12 +222,12 @@ export default function App() {
       // Hide success message after 3 seconds
       setTimeout(() => setShowSuccess(false), 3000);
       
-      // Refresh user's NFTs immediately after successful mint
+      // Refresh user's NFTs immediately after successful mint (reduced delay)
       setTimeout(() => {
         if (isConnected && address) {
           fetchUserNFTs();
         }
-      }, 2000);
+      }, 1000); // Reduced from 2000 to 1000ms
       
       setHash(undefined);
       successHandled.current = false;
@@ -299,6 +309,8 @@ export default function App() {
 
   const handleBackToMint = () => {
     setShowCollection(false);
+    // Always reset to preview NFT when going back to mint page
+    setDisplayNFT(generatePreviewNFT());
   };
 
   const handleNFTClick = (nft: any) => {
