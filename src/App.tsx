@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAccount, useConnect, useConnectors, useChainId } from 'wagmi';
 import { generatePreviewNFT, generateUnikoNFT } from './config';
 
@@ -13,6 +13,8 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [contextUser, setContextUser] = useState<any>(null);
   const itemsPerPage = 16;
+  const mintButtonRef = useRef<HTMLButtonElement>(null);
+  const testButtonRef = useRef<HTMLButtonElement>(null);
 
   // Wagmi hooks
   const { address, isConnected } = useAccount();
@@ -77,6 +79,50 @@ export default function App() {
     console.log('- address:', address);
     console.log('- connectors count:', connectors.length);
   }, [isMinting, isConnected, address, connectors]);
+
+  // Native event listeners as fallback for Farcaster iframe issues
+  useEffect(() => {
+    const mintButton = mintButtonRef.current;
+    const testButton = testButtonRef.current;
+
+    if (mintButton) {
+      const handleNativeMintClick = (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('🎯 Native mint click detected!');
+        handleMint();
+      };
+
+      mintButton.addEventListener('click', handleNativeMintClick, { passive: false });
+      mintButton.addEventListener('touchend', handleNativeMintClick, { passive: false });
+      
+      return () => {
+        mintButton.removeEventListener('click', handleNativeMintClick);
+        mintButton.removeEventListener('touchend', handleNativeMintClick);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    const testButton = testButtonRef.current;
+
+    if (testButton) {
+      const handleNativeTestClick = (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('🎯 Native test click detected!');
+        alert('NATIVE TEST BUTTON WORKS!');
+      };
+
+      testButton.addEventListener('click', handleNativeTestClick, { passive: false });
+      testButton.addEventListener('touchend', handleNativeTestClick, { passive: false });
+      
+      return () => {
+        testButton.removeEventListener('click', handleNativeTestClick);
+        testButton.removeEventListener('touchend', handleNativeTestClick);
+      };
+    }
+  }, []);
 
   // Use SDK context for user data, fallback to wallet address
   const mockUser = {
@@ -721,6 +767,9 @@ export default function App() {
 
         {/* Test Button - Simple Click Test */}
         <button
+          ref={testButtonRef}
+          onMouseDown={() => alert('TEST BUTTON WORKS!')}
+          onTouchStart={() => alert('TEST BUTTON WORKS!')}
           onClick={() => alert('TEST BUTTON WORKS!')}
           style={{ 
             backgroundColor: '#10B981', 
@@ -732,7 +781,9 @@ export default function App() {
             fontSize: '12px', 
             cursor: 'pointer',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
-            marginBottom: '8px'
+            marginBottom: '8px',
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation'
           }}
         >
           TEST BUTTON
@@ -740,6 +791,9 @@ export default function App() {
 
         {/* Mint Button */}
         <button
+          ref={mintButtonRef}
+          onMouseDown={handleMint}
+          onTouchStart={handleMint}
           onClick={handleMint}
           disabled={isMinting}
           style={{ 
@@ -753,7 +807,9 @@ export default function App() {
             boxShadow: '0 6px 16px rgba(0, 0, 0, 0.1)', 
             cursor: isMinting ? 'not-allowed' : 'pointer',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif',
-            marginBottom: '8px'
+            marginBottom: '8px',
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation'
           }}
         >
           {isMinting ? "Minting..." : "Mint • 0.001 ETH"}
