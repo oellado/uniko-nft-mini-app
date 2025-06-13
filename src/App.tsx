@@ -56,16 +56,15 @@ export default function App() {
     initSDK();
   }, []);
 
-  // Fetch user's NFTs when wallet connects or when balance/supply changes
+  // Auto-hide success toast after 3 seconds
   useEffect(() => {
-    if (isConnected && address && balance !== undefined && totalSupply !== undefined) {
-      fetchUserNFTs();
-    } else if (!isConnected) {
-      setMintedNFTs([]);
-      // Reset to preview NFT when disconnected
-      setDisplayNFT(generatePreviewNFT());
+    if (successToast) {
+      const timer = setTimeout(() => {
+        setSuccessToast(null);
+      }, 3000);
+      return () => clearTimeout(timer);
     }
-  }, [isConnected, address, balance, totalSupply]);
+  }, [successToast]);
 
   // Read user's NFT balance
   const { data: balance } = useReadContract({
@@ -83,6 +82,17 @@ export default function App() {
     functionName: 'totalSupply',
     query: { enabled: true }
   });
+
+  // Fetch user's NFTs when wallet connects or when balance/supply changes
+  useEffect(() => {
+    if (isConnected && address && balance !== undefined && totalSupply !== undefined) {
+      fetchUserNFTs();
+    } else if (!isConnected) {
+      setMintedNFTs([]);
+      // Reset to preview NFT when disconnected
+      setDisplayNFT(generatePreviewNFT());
+    }
+  }, [isConnected, address, balance, totalSupply]);
 
   // Fetch user's NFTs from blockchain
   const fetchUserNFTs = async () => {
@@ -223,16 +233,6 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [errorToast]);
-
-  // Auto-hide success toast after 3 seconds
-  useEffect(() => {
-    if (successToast) {
-      const timer = setTimeout(() => {
-        setSuccessToast(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [successToast]);
 
   const handleMint = async () => {
     try {
