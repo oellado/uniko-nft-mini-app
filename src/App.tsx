@@ -11,6 +11,7 @@ export default function App() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [contextUser, setContextUser] = useState<any>(null);
   const itemsPerPage = 16;
 
   // Wagmi hooks
@@ -26,6 +27,14 @@ export default function App() {
           const { sdk } = await import('@farcaster/frame-sdk');
           await sdk.actions.ready();
           console.log('Frame SDK initialized successfully');
+          
+          // Get user context
+          try {
+            const context = await sdk.context;
+            setContextUser(context.user);
+          } catch (error) {
+            console.log('Could not get user context:', error);
+          }
         }
         
         setIsSDKLoaded(true);
@@ -43,17 +52,20 @@ export default function App() {
     if (isSDKLoaded && !isConnected && connectors.length > 0) {
       const farcasterConnector = connectors.find(c => c.id === 'farcasterFrame');
       if (farcasterConnector) {
-        connect({ connector: farcasterConnector });
+        // Small delay to ensure SDK is fully ready
+        setTimeout(() => {
+          connect({ connector: farcasterConnector });
+        }, 100);
       }
     }
   }, [isSDKLoaded, isConnected, connectors, connect]);
 
-  // Mock user data - use wallet address if connected
+  // Use SDK context for user data, fallback to wallet address
   const mockUser = {
-    fid: 12345,
-    username: 'testuser',
-    displayName: address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Test User',
-    pfpUrl: 'https://i.imgur.com/placeholder.jpg'
+    fid: contextUser?.fid || 12345,
+    username: contextUser?.username || 'testuser',
+    displayName: contextUser?.displayName || (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Test User'),
+    pfpUrl: contextUser?.pfpUrl || 'https://i.imgur.com/placeholder.jpg'
   };
 
   const handleMint = async () => {
@@ -494,23 +506,38 @@ export default function App() {
             cursor: 'pointer' 
           }}
         >
-          <div style={{ 
-            width: '28px', 
-            height: '28px', 
-            borderRadius: '50%', 
-            background: 'linear-gradient(135deg, #60A5FA 0%, #A855F7 100%)', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            color: 'white', 
-            fontSize: '11px', 
-            fontWeight: 'bold', 
-            border: '2px solid white', 
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
-          }}>
-            {mockUser.displayName?.[0] || '?'}
-          </div>
+          {mockUser.pfpUrl && mockUser.pfpUrl !== 'https://i.imgur.com/placeholder.jpg' ? (
+            <img 
+              src={mockUser.pfpUrl} 
+              alt="Profile"
+              style={{ 
+                width: '28px', 
+                height: '28px', 
+                borderRadius: '50%', 
+                border: '2px solid white', 
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                objectFit: 'cover'
+              }}
+            />
+          ) : (
+            <div style={{ 
+              width: '28px', 
+              height: '28px', 
+              borderRadius: '50%', 
+              background: 'linear-gradient(135deg, #60A5FA 0%, #A855F7 100%)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              color: 'white', 
+              fontSize: '11px', 
+              fontWeight: 'bold', 
+              border: '2px solid white', 
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif'
+            }}>
+              {mockUser.displayName?.[0] || '?'}
+            </div>
+          )}
         </button>
       </div>
 
@@ -633,7 +660,7 @@ export default function App() {
             textAlign: 'center',
             animation: 'fadeInOut 3s ease-in-out'
           }}>
-            ✨ Successfully minted!
+            •ᴗ• Successfully minted!
           </div>
         )}
 
