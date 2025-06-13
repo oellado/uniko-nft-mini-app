@@ -157,36 +157,39 @@ export default function App() {
         ]
       });
 
-      // Call the smart contract mint function
-      const { writeContract } = await import('wagmi/actions');
-      const { config } = await import('./wagmi');
+      // Use Farcaster SDK for transaction
+      const { sdk } = await import('@farcaster/frame-sdk');
       const { contractConfig } = await import('./config');
+      const { encodeFunctionData } = await import('viem');
 
-      console.log('📝 Calling mint function with:', {
+      console.log('📝 Calling Farcaster transaction with:', {
         address: contractConfig.address,
         functionName: 'mint',
         args: [address!, metadata],
         value: '1000000000000000'
       });
 
-      const hash = await writeContract(config, {
-        address: contractConfig.address,
+      // Encode the function data using viem
+      const data = encodeFunctionData({
         abi: contractConfig.abi,
         functionName: 'mint',
         args: [address!, metadata],
-        value: BigInt('1000000000000000'), // 0.001 ETH in wei
-        chainId: 84532, // Base Sepolia
       });
 
-      console.log('✅ Transaction hash:', hash);
-      
-      // Wait for transaction confirmation
-      const { waitForTransactionReceipt } = await import('wagmi/actions');
-      const receipt = await waitForTransactionReceipt(config, { hash });
-      
-      console.log('✅ Transaction confirmed:', receipt);
+      // Use Farcaster's sendTransaction method which shows the official modal
+      const transactionId = await sdk.actions.sendTransaction({
+        chainId: `eip155:84532`, // Base Sepolia in CAIP-2 format
+        method: 'eth_sendTransaction',
+        params: {
+          to: contractConfig.address,
+          data: data,
+          value: '0x38D7EA4C68000', // 0.001 ETH in hex
+        },
+      });
 
-      // Add to local state after successful mint
+      console.log('✅ Transaction ID:', transactionId);
+
+      // Add to local state after successful transaction initiation
       setMintedNFTs(prev => [...prev, newNFT]);
       setDisplayNFT(newNFT);
       setIsMinting(false);
