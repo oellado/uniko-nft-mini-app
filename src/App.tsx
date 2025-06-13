@@ -77,9 +77,47 @@ export default function App() {
     setIsMinting(true);
     setShowSuccess(false);
     
-    // Simulate minting process
-    setTimeout(() => {
+    try {
+      // Generate NFT metadata
       const newNFT = generateUnikoNFT(`seed-${Date.now()}-${Math.random()}`);
+      const metadata = JSON.stringify({
+        name: newNFT.name,
+        description: "A cute on-chain companion, 100% on-chain generative Unicode NFT",
+        image: `data:image/svg+xml;base64,${btoa(newNFT.svg)}`,
+        attributes: [
+          { trait_type: "Eyes", value: newNFT.traits.eyes },
+          { trait_type: "Mouth", value: newNFT.traits.mouth },
+          { trait_type: "Left Cheek", value: newNFT.traits.leftCheek },
+          { trait_type: "Right Cheek", value: newNFT.traits.rightCheek },
+          { trait_type: "Accessory", value: newNFT.traits.accessory },
+          { trait_type: "Background", value: newNFT.traits.background },
+          { trait_type: "Face Color", value: newNFT.traits.face },
+          { trait_type: "Rarity", value: newNFT.isUltraRare ? "Ultra Rare" : "Regular" }
+        ]
+      });
+
+      // Call the smart contract mint function
+      const { writeContract } = await import('wagmi/actions');
+      const { config } = await import('./wagmi');
+      const { contractConfig } = await import('./config');
+
+      const hash = await writeContract(config, {
+        address: contractConfig.address,
+        abi: contractConfig.abi,
+        functionName: 'mint',
+        args: [address!, metadata],
+        value: BigInt('1000000000000000'), // 0.001 ETH in wei
+      });
+
+      console.log('Transaction hash:', hash);
+      
+      // Wait for transaction confirmation
+      const { waitForTransactionReceipt } = await import('wagmi/actions');
+      const receipt = await waitForTransactionReceipt(config, { hash });
+      
+      console.log('Transaction confirmed:', receipt);
+
+      // Add to local state after successful mint
       setMintedNFTs(prev => [...prev, newNFT]);
       setDisplayNFT(newNFT);
       setIsMinting(false);
@@ -87,7 +125,12 @@ export default function App() {
       
       // Hide success message after 3 seconds
       setTimeout(() => setShowSuccess(false), 3000);
-    }, 2000);
+      
+    } catch (error) {
+      console.error('Minting failed:', error);
+      setIsMinting(false);
+      alert('Minting failed. Please try again.');
+    }
   };
 
   const handleProfileClick = () => {
