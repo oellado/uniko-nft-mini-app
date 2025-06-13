@@ -83,7 +83,6 @@ export default function App() {
   // Native event listeners as fallback for Farcaster iframe issues
   useEffect(() => {
     const mintButton = mintButtonRef.current;
-    const testButton = testButtonRef.current;
 
     if (mintButton) {
       const handleNativeMintClick = (e: Event) => {
