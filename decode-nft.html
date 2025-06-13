@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NFT Preview</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .nft-container { border: 2px solid #ccc; padding: 20px; margin: 20px 0; }
+        .metadata { background: #f5f5f5; padding: 15px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Unikō NFT #1 Preview</h1>
+    
+    <div class="nft-container">
+        <h2>Visual Preview:</h2>
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTAiIGhlaWdodD0iMjUwIj4KICAgIAogICAgPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI0Y5QkZGMiIvPgogICAgPHRleHQgeT0iNTAlIiBmb250LXNpemU9IjIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgZm9udC1mYW1pbHk9IlNlZ29lIFVJIiBmaWxsPSIjNTdBNTJCIj4KICAgICAgPHRzcGFuIHg9IjM1JSI+PC90c3Bhbj4KICAgICAgPHRzcGFuIHg9IjQzJSI+4oCiPC90c3Bhbj4KICAgICAgPHRzcGFuIHg9IjUwJSI+yow8L3RzcGFuPgogICAgICA8dHNwYW4geD0iNTclIj7igKI8L3RzcGFuPgogICAgICA8dHNwYW4geD0iNjUlIj48L3RzcGFuPgogICAgICA8dHNwYW4geD0iNzIlIj48L3RzcGFuPgogICAgPC90ZXh0PgogIDwvc3ZnPg==" alt="Unikō NFT #1" style="border: 1px solid #ddd;">
+    </div>
+    
+    <div class="metadata">
+        <h2>📋 Metadata:</h2>
+        <p><strong>Name:</strong> Uniko #1</p>
+        <p><strong>Description:</strong> A cute on-chain companion, 100% on-chain generative Unicode NFT</p>
+        
+        <h3>🎯 Traits:</h3>
+        <ul>
+            <li><strong>Eyes:</strong> •</li>
+            <li><strong>Mouth:</strong> ʌ</li>
+            <li><strong>Left Cheek:</strong> none</li>
+            <li><strong>Right Cheek:</strong> none</li>
+            <li><strong>Accessory:</strong> none</li>
+            <li><strong>Background:</strong> #F9BFF2 (Pink)</li>
+            <li><strong>Face Color:</strong> #57A52B (Green)</li>
+            <li><strong>Rarity:</strong> Regular</li>
+        </ul>
+    </div>
+    
+    <div class="metadata">
+        <h2>🔗 Links:</h2>
+        <p><a href="https://sepolia.basescan.org/address/0xC6504dC915Afe34abc9019B64EcC131623AA0aD4" target="_blank">View Contract on Basescan</a></p>
+        <p><a href="https://sepolia.basescan.org/token/0xC6504dC915Afe34abc9019B64EcC131623AA0aD4?a=1" target="_blank">View Token #1 on Basescan</a></p>
+    </div>
+    
+    <script>
+        // Decode the base64 SVG and show the raw SVG code
+        const base64Data = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTAiIGhlaWdodD0iMjUwIj4KICAgIAogICAgPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI0Y5QkZGMiIvPgogICAgPHRleHQgeT0iNTAlIiBmb250LXNpemU9IjIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgZm9udC1mYW1pbHk9IlNlZ29lIFVJIiBmaWxsPSIjNTdBNTJCIj4KICAgICAgPHRzcGFuIHg9IjM1JSI+PC90c3Bhbj4KICAgICAgPHRzcGFuIHg9IjQzJSI+4oCiPC90c3Bhbj4KICAgICAgPHRzcGFuIHg9IjUwJSI+yow8L3RzcGFuPgogICAgICA8dHNwYW4geD0iNTclIj7igKI8L3RzcGFuPgogICAgICA8dHNwYW4geD0iNjUlIj48L3RzcGFuPgogICAgICA8dHNwYW4geD0iNzIlIj48L3RzcGFuPgogICAgPC90ZXh0PgogIDwvc3ZnPg==";
+        const decodedSVG = atob(base64Data);
+        
+        document.body.innerHTML += `
+            <div class="metadata">
+                <h2>🔧 Raw SVG Code:</h2>
+                <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto;">${decodedSVG}</pre>
+            </div>
+        `;
+    </script>
+</body>
+</html> 

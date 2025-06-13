@@ -13,7 +13,7 @@ export default function App() {
   const [displayNFT, setDisplayNFT] = useState(() => generatePreviewNFT());
   const [mintedNFTs, setMintedNFTs] = useState<any[]>([]);
   const [selectedNFT, setSelectedNFT] = useState<any | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [hash, setHash] = useState<`0x${string}`>();
   const [isLoadingNFTs, setIsLoadingNFTs] = useState(false);
