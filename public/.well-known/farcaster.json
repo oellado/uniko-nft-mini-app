@@ -1,0 +1,20 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjMyMzI1MSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDk1MjhkMDUwN2Q3MzNGRUFkRThkNWY2M2QwQTJlNzAxNjQ2NjkwNkIifQ",
+    "payload": "eyJkb21haW4iOiJ1bmlrby5taWd1ZWxnYXJlc3QuY29tIn0",
+    "signature": "MHg5ZTM2ZDczZWE5YThlNTBkMmE2ODkyM2NjMWQ4NWIzNDRmMzJlNGIzNTg3OTIzYmNlOGMyNzBkMmIyMDkzNGMyNzQyMmJmYWFjNTc4MzQ1NzU2NTgyZjM5OGM4M2JlODhlNDEyMGE3ZmZlZjNmOTMwNjUzOTMxNGRjODMwY2YwYTFi"
+  },
+  "frame": {
+    "version": "next",
+    "name": "Unikō",
+    "description": "Uniko, your cute onchain companions, a generative project by miguelgarest",
+    "iconUrl": "https://miguelgarest.com/fc/uniko_icon.gif",
+    "homeUrl": "https://uniko.miguelgarest.com",
+    "imageUrl": "https://miguelgarest.com/fc/uniko.gif",
+    "buttonTitle": "Mint Unikō",
+    "splashImageUrl": "https://miguelgarest.com/fc/uniko_icon.gif",
+    "splashBackgroundColor": "#D1D8FE",
+    "tags": ["nft", "art", "generative", "miguelgarest", "unicode"],
+    "webhookUrl": "https://uniko.miguelgarest.com/api/webhook"
+  }
+} 
