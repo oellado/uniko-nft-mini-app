@@ -29,11 +29,5 @@
         }
       ]
     }
-  ],
-  "routes": [
-    {
-      "src": "/.well-known/farcaster.json",
-      "dest": "/.well-known/farcaster.json"
-    }
   ]
 } 
