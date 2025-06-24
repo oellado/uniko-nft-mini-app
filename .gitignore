@@ -136,9 +136,22 @@ extract-abi.js
 !public/*.gif
 !public/*.png
 
-# Test and load testing scripts (contain sensitive references)
-scripts/load-test*.js
-scripts/batch-mint*.js
+# ALL SCRIPTS - Keep development tools private
+scripts/
+
+# Development configuration files
+hardhat.config.cjs
+tailwind.config.ts
+tsconfig.json
+tsconfig.node.json
+vite.config.d.ts
+vite.config.js
+vite.config.ts
+package-lock.json
+
+# Personal development files
+.cursorrules
+*.code-workspace
 
 # Compiled binary addons
 *.node
