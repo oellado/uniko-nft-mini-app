@@ -139,15 +139,13 @@ extract-abi.js
 # ALL SCRIPTS - Keep development tools private
 scripts/
 
-# Development configuration files
+# Development configuration files (keep essential build files public)
 hardhat.config.cjs
-tailwind.config.ts
-tsconfig.json
-tsconfig.node.json
-vite.config.d.ts
-vite.config.js
-vite.config.ts
-package-lock.json
+# Keep these for Vercel deployment:
+# tailwind.config.ts - needed for CSS
+# tsconfig.json - needed for TypeScript
+# vite.config.ts - needed for build
+# package-lock.json - needed for exact dependencies
 
 # Personal development files
 .cursorrules
