@@ -1363,7 +1363,7 @@ export default function App() {
         }}>
           {showGif ? (
             <img 
-              src="/example_340px.gif" 
+              src="https://miguelgarest.com/fc/uniko.gif" 
               alt="Animated Unikō Preview" 
               style={{
                 width: '100%',
