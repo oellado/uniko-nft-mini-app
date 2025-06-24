@@ -1,207 +1,31 @@
-# Dependencies
+# Essential build files
 node_modules/
-.pnp
-.pnp.js
-
-# Environment variables (CRITICAL - Never commit these!)
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Hardhat
-artifacts/
-cache/
-coverage/
-
-# Build outputs
 dist/
-build/
+.env*
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
-
-# nyc test coverage
-.nyc_output
-
-# Dependency directories
-node_modules/
-jspm_packages/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Gatsby files
-.cache/
-public
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Temporary folders
-tmp/
-temp/
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# System files  
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# Python virtual environment
-.venv/
-venv/
-__pycache__/
-*.py[cod]
-*$py.class
+# Development logs
+*.log
 
-# Sensitive project files - NEVER COMMIT THESE!
+# Keep private
+contracts/
 private/
-allowlist-output/
-Downloaded*/
-Example*/
 memory-bank/
-
-# Personal development files
-quick-status-check.js
-add-user-to-allowlist.js
-get-token.js
-extract-abi.js
-
-# Local development files
-quick-status-check.js
-add-user-to-allowlist.js
+allowlist-output/
+artifacts/
+cache/
+scripts/
+docs/
+*.code-workspace
+hardhat.config.cjs
+*-to-allowlist.js
 get-token.js
 extract-abi.js
 *.gif
 *.png
-!public/*.gif
-!public/*.png
-
-# ALL SCRIPTS - Keep development tools private
-scripts/
-
-# Development configuration files (keep essential build files public)
-hardhat.config.cjs
-# Keep these for Vercel deployment:
-# tailwind.config.ts - needed for CSS
-# tsconfig.json - needed for TypeScript
-# vite.config.ts - needed for build
-# package-lock.json - needed for exact dependencies
-
-# Personal development files
-.cursorrules
-*.code-workspace
-
-# Documentation folder (keep private)
-docs/
-
-# Old development files (should not be public)
-FONT_EMBEDDING_GUIDE.md
-check-font-contract-size.js
-check-size.js
-check-v4-size.js  
-check-v8-size.js
-env.example
-font-subset-script.py
-size-check.js
-test-contract.js
-uniko-subset-base64.txt
-
-# Compiled binary addons
-*.node
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-.env.test
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
+Downloaded*/
+Example*/
+.vercel/
