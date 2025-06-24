@@ -153,6 +153,21 @@ package-lock.json
 .cursorrules
 *.code-workspace
 
+# Documentation folder (keep private)
+docs/
+
+# Old development files (should not be public)
+FONT_EMBEDDING_GUIDE.md
+check-font-contract-size.js
+check-size.js
+check-v4-size.js  
+check-v8-size.js
+env.example
+font-subset-script.py
+size-check.js
+test-contract.js
+uniko-subset-base64.txt
+
 # Compiled binary addons
 *.node
 
