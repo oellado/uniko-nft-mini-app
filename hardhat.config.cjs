@@ -8,7 +8,7 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1  // Aggressive optimization for size reduction
+        runs: 200 // A high value for size optimization
       },
       viaIR: true
     }

@@ -1,51 +1,45 @@
 # Dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+.pnp
+.pnp.js
 
-# Build outputs
-dist/
-build/
-
-# Environment files
+# Environment variables (CRITICAL - Never commit these!)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Hardhat files
+# Hardhat
 artifacts/
 cache/
-typechain/
-typechain-types/
+coverage/
+
+# Build outputs
+dist/
+build/
 
 # Logs
-logs
-*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
 
+# nyc test coverage
+.nyc_output
+
 # Dependency directories
+node_modules/
 jspm_packages/
 
 # Optional npm cache directory
@@ -54,23 +48,134 @@ jspm_packages/
 # Optional eslint cache
 .eslintcache
 
-# Vercel
-.vercel
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
 
-# TypeScript
-*.tsbuildinfo
+# Optional REPL history
+.node_repl_history
 
-# Temporary files
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
 tmp/
 temp/
 
-# Private files
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python virtual environment
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Sensitive project files - NEVER COMMIT THESE!
 private/
+allowlist-output/
+Downloaded*/
+Example*/
+memory-bank/
 
-# Font files (if they're large)
-*.ttf
-*.woff
-*.woff2
+# Personal development files
+quick-status-check.js
+add-user-to-allowlist.js
+get-token.js
+extract-abi.js
 
-# Deployment files
-deployment-*.json
+# Local development files
+quick-status-check.js
+add-user-to-allowlist.js
+get-token.js
+extract-abi.js
+*.gif
+*.png
+!public/*.gif
+!public/*.png
+
+# Test and load testing scripts (contain sensitive references)
+scripts/load-test*.js
+scripts/batch-mint*.js
+
+# Compiled binary addons
+*.node
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test

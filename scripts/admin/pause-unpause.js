@@ -1,57 +1,64 @@
 const { ethers } = require("hardhat");
+require('dotenv').config();
 
-// ENHANCED V8 CONTRACT ADDRESS - ADVANCED TRAIT SYSTEM
-const CONTRACT_ADDRESS = "0x7Ed40cce63DD95B448f26A5361Bef20143e6F49a";
-
-async function main() {
-    console.log("🔧 Unikō Admin Tool - Pause/Unpause Contract");
-    console.log("📍 Contract Address:", CONTRACT_ADDRESS);
-    
-    // Get contract instance
-    const UnikoOnchain8 = await ethers.getContractFactory("UnikoOnchain8");
-    const contract = UnikoOnchain8.attach(CONTRACT_ADDRESS);
-    
-    // Get signer (must be contract owner)
-    const [signer] = await ethers.getSigners();
-    console.log("👤 Admin Address:", signer.address);
+async function togglePause() {
+    console.log("⏸️ TOGGLING CONTRACT PAUSE STATE...\n");
     
     try {
-        // Check current pause status
-        const isPaused = await contract.paused();
-        console.log("📊 Current Status:", isPaused ? "PAUSED" : "ACTIVE");
+        // Connect directly to Base Sepolia
+        const provider = new ethers.JsonRpcProvider("https://sepolia.base.org");
         
-        if (isPaused) {
-            console.log("\n🔓 Unpausing contract...");
-            const tx = await contract.unpause();
-            console.log("📝 Transaction Hash:", tx.hash);
-            await tx.wait();
-            console.log("✅ Contract UNPAUSED successfully!");
-        } else {
-            console.log("\n⏸️ Pausing contract...");
-            const tx = await contract.pause();
-            console.log("📝 Transaction Hash:", tx.hash);
-            await tx.wait();
-            console.log("✅ Contract PAUSED successfully!");
+        // Load private key from env
+        const privateKey = process.env.PRIVATE_KEY;
+        if (!privateKey) {
+            throw new Error("❌ PRIVATE_KEY not set in .env file");
         }
         
-        // Verify new status
-        const newStatus = await contract.paused();
-        console.log("📊 New Status:", newStatus ? "PAUSED" : "ACTIVE");
+        // Create signer
+        const signer = new ethers.Wallet(privateKey, provider);
+        console.log("👤 Admin wallet:", signer.address);
+        
+        // Get the contract - DUAL-CONTRACT SYSTEM
+        const contractAddress = process.env.CONTRACT_ADDRESS || "0x6Aa08b3FA75C395c8cbD23f235992EfedF3A8183";
+        
+        // Load contract ABI - DUAL-CONTRACT SYSTEM
+        const contractABI = require("../../src/Uniko_01ABI.json");
+        const contract = new ethers.Contract(contractAddress, contractABI, signer);
+        
+        // Check current pause state
+        const isPaused = await contract.paused();
+        console.log(`📊 Current state: ${isPaused ? "PAUSED" : "UNPAUSED"}`);
+        
+        // Toggle pause state
+        const action = isPaused ? "Unpausing" : "Pausing";
+        console.log(`⏳ ${action} contract...`);
+        
+        const tx = isPaused ? await contract.unpause() : await contract.pause();
+        console.log(`📝 Transaction hash: ${tx.hash}`);
+        
+        console.log("⏳ Waiting for confirmation...");
+        await tx.wait();
+        
+        // Verify the change
+        const newState = await contract.paused();
+        console.log(`\n🎉 CONTRACT ${newState ? "PAUSED" : "UNPAUSED"}!`);
+        console.log(`📊 New state: ${newState ? "PAUSED" : "UNPAUSED"}`);
+        console.log(`   ${newState ? "❌ No minting allowed" : "✅ Minting allowed"}`);
+        console.log(`   Time: ${new Date().toLocaleString()}`);
         
     } catch (error) {
-        console.error("❌ Operation failed:", error.message);
-        if (error.message.includes("Ownable: caller is not the owner")) {
-            console.log("💡 Make sure you're using the contract owner account");
-        }
+        console.error("❌ Error toggling pause state:", error.message);
+        process.exit(1);
     }
 }
 
-main()
-    .then(() => {
-        console.log("\n🎉 Admin operation completed!");
-        process.exit(0);
-    })
-    .catch((error) => {
-        console.error("❌ Script failed:", error);
-        process.exit(1);
-    }); 
+if (require.main === module) {
+    togglePause()
+        .then(() => process.exit(0))
+        .catch((error) => {
+            console.error(error);
+            process.exit(1);
+        });
+}
+
+module.exports = { togglePause }; 

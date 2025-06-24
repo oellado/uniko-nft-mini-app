@@ -60,7 +60,7 @@
   }
   
   html {
-    background-color: #BFDBFE !important;
+    background-color: transparent !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
@@ -75,7 +75,7 @@
   
   body {
     @apply text-foreground;
-    background-color: #BFDBFE !important;
+    background-color: transparent !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
